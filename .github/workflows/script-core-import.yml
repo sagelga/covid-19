@@ -28,4 +28,4 @@ jobs:
         run: pip3 install -r requirements.txt
 
       - name: Run code
-        run: cd src && python df_import
+        run: cd src && python df_import.py
