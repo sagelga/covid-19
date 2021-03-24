@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.io as pio
 
 # Importing data
 from df_import import df_import
@@ -15,8 +16,36 @@ from df_import import df_import
 df = df_import()
 df = df.dropna(subset=['continent'])
 
-# Create line chart
-fig = px.line(df, x="date", y="total_cases", title='Total Cases',
-              color="continent", line_group="location", hover_name="location")
+# Selection bar
+all_country = df.location.unique()
 
-fig.show()
+app = dash.Dash(__name__)
+
+app.layout = html.Div([
+    dcc.Dropdown(
+        id="dropdown",
+        options=[{"label": x, "value": x}
+                 for x in all_country],
+        value=['Thailand'],
+        multi=True
+    ),
+    dcc.Graph(id="line-chart"),
+])
+
+
+@app.callback(
+    Output("line-chart", "figure"),
+    [Input("dropdown", "value")]
+)
+# Create line chart
+def update_line_chart(countries):
+    mask = df.location.isin(countries)
+    fig = px.line(df[mask], x="date", y="total_cases",
+                  color="continent", line_group="location", hover_name="location")
+    fig.update_layout(title='Total Case by Country',
+                      xaxis_title='Date', yaxis_title='Total Case',
+                      font_family='Jetbrains Mono', title_font_family='Jetbrains Mono')
+    return fig
+
+
+# app.run_server(debug=True)
