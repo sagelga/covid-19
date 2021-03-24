@@ -2,6 +2,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,windows,macos,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,windows,macos,visualstudiocode
 
+### Project's ignore
+src/owid-covid-data.csv
+
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
