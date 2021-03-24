@@ -7,33 +7,25 @@ on:
     branches:
       - main
 
-
 jobs:
-  setup-pypy:
-    name: Setup PyPy ${{ matrix.pypy }} ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
-        pypy:
-        - 'pypy-3.6'
-        - 'pypy-3.7'
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: setup-python ${{ matrix.pypy }}
-        uses: ./
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.pypy }}
+          python-version: ${{ matrix.python-version }}
 
       - name: PyPy and Python version
         run: python --version
 
-      - name: Install requirements
-        run: pip3 install -r requirements.txt
+      - name: Install dependencies
+        run: cd src && pip3 install -r requirements.txt
 
       - name: Run code
-        run: python core.py
+        run: cd src && python df_import
