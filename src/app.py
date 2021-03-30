@@ -15,7 +15,6 @@ from df_import import df_import
 # Data selection
 df = df_import()
 df = df.dropna(subset=['continent'])
-df = df.dropna(subset=['people_vaccinated'])
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -24,6 +23,13 @@ server = app.server
 # Selection bar
 all_country = df.location.unique()
 app.layout = html.Div([
+    html.H1('covid-vaccines'),
+
+    dcc.Graph(id="active-case"),
+    dcc.Graph(id="vaccinate-timeline"),
+
+    html.H5('Change visible countries'),
+
     dcc.Dropdown(
         id="dropdown",
         options=[{"label": x, "value": x}
@@ -31,16 +37,18 @@ app.layout = html.Div([
         value=all_country,
         multi=True
     ),
-    dcc.Graph(id="line-chart"),
 ], style={'font-family': 'Jetbrains Mono'})
 
 
+# Create line chart
 @app.callback(
-    Output("line-chart", "figure"),
+    Output("vaccinate-timeline", "figure"),
     [Input("dropdown", "value")]
 )
-# Create line chart
-def update_line_chart(countries):
+def vaccinate_timeline(countries):
+    # df = df_import()
+
+    # df = df.dropna(subset=['people_vaccinated'])
     mask = df.location.isin(countries)
 
     # Calculate fields
@@ -50,6 +58,22 @@ def update_line_chart(countries):
                   color="continent", hover_name="location")
     fig.update_layout(title='Vaccinated population by Country',
                       xaxis_title='Date', yaxis_title='Vaccinated (Percent)',
+                      font_family='Jetbrains Mono', title_font_family='Jetbrains Mono')
+    return fig
+
+
+# Create line chart
+@app.callback(
+    Output("active-case", "figure"),
+    [Input("dropdown", "value")]
+)
+def active_case(countries):
+    mask = df.location.isin(countries)
+
+    fig = px.line(df[mask], x="date", y="total_cases",
+                  color="continent", line_group="location", hover_name="location")
+    fig.update_layout(title='Total Case by Country',
+                      xaxis_title='Date', yaxis_title='Total Case',
                       font_family='Jetbrains Mono', title_font_family='Jetbrains Mono')
     return fig
 
