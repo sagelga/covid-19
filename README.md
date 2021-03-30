@@ -3,6 +3,7 @@ COVID-19 Vaccination Progress Data
 
 Data pulled from
 - [https://www.kaggle.com/fedesoriano/coronavirus-covid19-vaccinations-data](https://www.kaggle.com/fedesoriano/coronavirus-covid19-vaccinations-data)
+- [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
 
 ## Starting things up
 To start everythings up, run this code.
