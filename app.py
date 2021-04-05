@@ -9,32 +9,9 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.io as pio
 
-# Data selection
-df = df_import()
-df = df.dropna(subset=['continent'])
-
-app = dash.Dash(__name__)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
-
-# Selection bar
-all_country = df.location.unique()
-app.layout = html.Div([
-    html.H1('covid-vaccines'),
-
-    dcc.Graph(id="active-case"),
-    dcc.Graph(id="vaccinate-timeline"),
-
-    html.H5('Change visible countries'),
-
-    dcc.Dropdown(
-        id="dropdown",
-        options=[{"label": x, "value": x}
-                 for x in all_country],
-        value=all_country,
-        multi=True
-    ),
-], style={'font-family': 'Jetbrains Mono'})
-
 
 """
 Create Vaccinated-Total Population Line Chart
@@ -78,9 +55,6 @@ def active_case(countries):
     return fig
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
-
 """
 Function df_import() will imports the data from datasource
 and returns DataFrame that contains Pandas data.
@@ -93,3 +67,29 @@ def df_import():
     open('owid-covid-data.csv', 'wb').write(r.content)
 
     return pd.read_csv(url)
+
+
+# Data selection
+df = df_import()
+df = df.dropna(subset=['continent'])
+
+# Selection bar
+all_country = df.location.unique()
+app.layout = html.Div([
+    html.H1('covid-vaccines'),
+
+    dcc.Graph(id="active-case"),
+    dcc.Graph(id="vaccinate-timeline"),
+
+    html.H5('Change visible countries'),
+
+    dcc.Dropdown(
+        id="dropdown",
+        options=[{"label": x, "value": x}
+                for x in all_country],
+        value=all_country,
+        multi=True
+    ),
+], style={'font-family': 'Jetbrains Mono'})
+
+app.run_server(debug=True)
