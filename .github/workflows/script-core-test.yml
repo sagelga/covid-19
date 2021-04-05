@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8]
 
     steps:
       - uses: actions/checkout@v2
@@ -28,4 +28,4 @@ jobs:
         run: pip3 install -r requirements.txt
 
       - name: Run code
-        run: cd src && python core.py
+        run: python app.py

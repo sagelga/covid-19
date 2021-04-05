@@ -9,15 +9,11 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.io as pio
 
-# Importing data
-from df_import import df_import
-
 # Data selection
 df = df_import()
 df = df.dropna(subset=['continent'])
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)
 server = app.server
 
 # Selection bar
@@ -40,7 +36,9 @@ app.layout = html.Div([
 ], style={'font-family': 'Jetbrains Mono'})
 
 
-# Create line chart
+"""
+Create Vaccinated-Total Population Line Chart
+"""
 @app.callback(
     Output("vaccinate-timeline", "figure"),
     [Input("dropdown", "value")]
@@ -62,7 +60,9 @@ def vaccinate_timeline(countries):
     return fig
 
 
-# Create line chart
+"""
+Create Active Case Line Chart
+"""
 @app.callback(
     Output("active-case", "figure"),
     [Input("dropdown", "value")]
@@ -80,3 +80,16 @@ def active_case(countries):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+"""
+Function df_import() will imports the data from datasource
+and returns DataFrame that contains Pandas data.
+"""
+def df_import():
+
+    # Import data from GH
+    url = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv'
+    r = requests.get(url, allow_redirects=True)
+    open('owid-covid-data.csv', 'wb').write(r.content)
+
+    return pd.read_csv(url)
