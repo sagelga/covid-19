@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import requests
-
+import os
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -12,6 +12,7 @@ import plotly.io as pio
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
+app.title= "COVID-19 Data Visualize"
 
 """
 Create Vaccinated-Total Population Line Chart
@@ -95,4 +96,4 @@ app.layout = html.Div([
     ]),
 ], style={'font-family': 'Jetbrains Mono'})
 
-app.run_server(debug=True, port=int(os.environ.get("PORT", 5000)), host='0.0.0.0')
+app.run_server(debug=True, use_reloader=False)# app.run_server(debug=True, host='0.0.0.0')
