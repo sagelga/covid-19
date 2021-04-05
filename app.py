@@ -76,20 +76,23 @@ df = df.dropna(subset=['continent'])
 # Selection bar
 all_country = df.location.unique()
 app.layout = html.Div([
-    html.H1('covid-vaccines'),
+    html.Div([
+        html.H1('covid-vaccines'),
 
-    dcc.Graph(id="active-case"),
-    dcc.Graph(id="vaccinate-timeline"),
+        dcc.Graph(id="active-case"),
+        dcc.Graph(id="vaccinate-timeline"),
+    ]),
+    html.Div([
+        html.H5('Change visible countries'),
 
-    html.H5('Change visible countries'),
-
-    dcc.Dropdown(
-        id="dropdown",
-        options=[{"label": x, "value": x}
-                for x in all_country],
-        value=all_country,
-        multi=True
-    ),
+        dcc.Dropdown(
+            id="dropdown",
+            options=[{"label": x, "value": x}
+                    for x in all_country],
+            value=all_country,
+            multi=True
+        ),
+    ]),
 ], style={'font-family': 'Jetbrains Mono'})
 
-app.run_server(debug=True)
+app.run(debug=True, port=int(os.environ.get("PORT", 5000)), host='0.0.0.0')
