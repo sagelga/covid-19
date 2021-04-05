@@ -95,4 +95,4 @@ app.layout = html.Div([
     ]),
 ], style={'font-family': 'Jetbrains Mono'})
 
-app.run(debug=True, port=int(os.environ.get("PORT", 5000)), host='0.0.0.0')
+app.run_server(debug=True, port=int(os.environ.get("PORT", 5000)), host='0.0.0.0')
