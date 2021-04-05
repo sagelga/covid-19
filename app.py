@@ -13,7 +13,7 @@ import plotly.io as pio
 df = df_import()
 df = df.dropna(subset=['continent'])
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)
 server = app.server
 
 # Selection bar
