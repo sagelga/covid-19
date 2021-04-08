@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 
 # App Initialize
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],
@@ -37,11 +37,6 @@ all_country = df.location.unique()
 app.layout = html.Div([
     html.Div(children=[
         html.H1('covid-vaccines'),
-        html.P('Datasource from https://github.com/owid/covid-19-data/'),
-    ]),
-    html.Div(children=[
-        dcc.Graph(id="active-case"),
-        dcc.Graph(id="vaccinate-timeline"),
     ]),
     html.Div(children=[
         html.H5('Change visible countries'),
@@ -50,9 +45,21 @@ app.layout = html.Div([
             id="dropdown",
             options=[{"label": x, "value": x}
                      for x in all_country],
-            value=all_country,
+            value=['Thailand'],
             multi=True
         ),
+    ]),
+    html.Div(children=[
+        html.Div(children=[
+            dcc.Graph(id="active-case"),
+        ], className="six columns"),
+        html.Div(children=[
+            dcc.Graph(id="vaccinate-timeline"),
+        ], className="six columns"),
+    ], className="row"),
+    html.Div(children=[
+        html.P('Datasource from https://github.com/owid/covid-19-data/'),
+        html.P('Repository : https://github.com/sagelga/covid-vaccine'),
     ]),
 ])
 
@@ -64,8 +71,11 @@ app.layout = html.Div([
 )
 def update_graph(countries):
     mask = df.location.isin(countries)
-    country_count = df.location.nunique()
-    country_selected = df[mask].location.nunique()
+
+    if len(countries) < 3:
+        title_country = ' and '.join([str(i) for i in countries])
+    else:
+        title_country = str(len(countries)) + " selected countries"
 
     # Create Vaccinated-Total Population Line Chart
     vcn_fig = px.line(
@@ -77,8 +87,8 @@ def update_graph(countries):
         hover_name="location",
         hover_data=['date', 'continent', 'people_vaccinated', 'population', 'ppl_vaccinated']
     )
-    title = "Vaccinated population in {} of {} countries".format(
-        country_selected, country_count)
+    title = "Population who received at least one vaccine dose in {}".format(
+        title_country)
     vcn_fig.update_layout(
         title=title,
         xaxis_title='Date',
@@ -93,12 +103,11 @@ def update_graph(countries):
         y="total_cases",
         color="location",
         hover_name="location",
-        hover_data=['date', 'continent', 'total_cases'],
-        # category_orders={"location": df["location"].tolist().sort()}
+        hover_data=['date', 'continent', 'total_cases']
     )
 
-    title = "Total Case in {} of {} countries".format(
-        country_selected, country_count)
+    title = "Total Case in {}".format(
+        title_country)
     atv_fig.update_layout(
         title=title,
         xaxis_title='Date',
