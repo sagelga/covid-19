@@ -1,7 +1,9 @@
 # COVID-19 Data Explorer
 COVID-19 Data Explorer is a dashboard-data explorer for COVID-19 data around the world; running on Python using Plotly/Dash framework.
 
-Data pulled from [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
+- Health Data pulled from [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
+- Vaccine Purchase &  Manufacturing Arrangements data pulled from [https://www.knowledgeportalia.org/covid19-vaccine-arrangements](https://www.knowledgeportalia.org/covid19-vaccine-arrangements)
+    - Data is pulled, convert and stored in `.csv`
 
 ## Local Development
 To locally develop this project, here's what you need 
