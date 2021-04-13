@@ -165,37 +165,44 @@ app.layout = html.Div([
      Input("dropdown-timerange", "value"),
      Input("dropdown-typechart", "value")]
 )
-def update_graph(countries, case_type, time_range, data_source):
+def update_graph(countries, case_type, time_range, type_chart):
     # -- Data Re-categorizing --
     # - Countries -
     mask = df.location.isin(countries)
     # - Time Range -
     time_range = "date"
-
+    
     if len(countries) < 3:
         title_country = ' and '.join([str(i) for i in countries])
     else:
         title_country = str(len(countries)) + " selected countries"
 
-    # Line Chart
-    figure = px.line(
-        df[mask],
-        x=time_range,
-        y=case_type,
-        color="location",
-        hover_name="location",
-        hover_data=['date', 'total_cases']
-    )
+    if type_chart == "line":
+        # Line Chart
+        fig = px.line(
+            df[mask],
+            x=time_range,
+            y=case_type,
+            color="location",
+            hover_name="location",
+            hover_data=['date', 'total_cases']
+        )
+    else if type_chart == "bar":
+        # fig = px.bar(df[mask])
+    else:
+        # World Map
+        # fig = px.choropleth(df, locations="iso_alpha", color="lifeExp", hover_name="country", animation_frame="year",
+        #                     range_color=[20, 80])
 
     title = "{} in {}".format(case_type, title_country)
-    figure.update_layout(
+    fig.update_layout(
         title=title,
         xaxis_title="Date",
         yaxis_title=str(case_type)
     )
-    figure.update_traces(connectgaps=True)
+    fig.update_traces(connectgaps=True)
 
-    return figure
+    return fig
 
 
 if __name__ == '__main__':
