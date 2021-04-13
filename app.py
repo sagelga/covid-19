@@ -35,8 +35,8 @@ df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['po
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
 
 # Calculate fields
-a=int((time.time()/900-3)/2%24)
-curr_time = chr(128336+a//2+a%2*12)
+a = int((time.time() / 900 - 3) / 2 % 24)
+curr_time = chr(128336 + a // 2 + a % 2 * 12)
 
 # Reused Components
 option_case_type = [
@@ -46,6 +46,9 @@ option_case_type = [
     {'label': 'Total deaths attributed', 'value': 'total_deaths'},
     {'label': 'Vaccinated one dose', 'value': 'people_vaccinated'},
     {'label': 'Vaccinated all doses', 'value': 'people_fully_vaccinated'},
+    {'label': 'Patient in Hospital', 'value': 'hosp_patients'},
+    {'label': 'Patient in ICU', 'value': 'icu_patients'},
+    {'label': 'Government Response Stringency Index', 'value': 'stringency_index'},
     {'label': 'Total confirmed cases per million people', 'value': 'total_cases_per_million'},
     {'label': 'Total deaths per million people', 'value': 'total_deaths_per_million'},
     {'label': 'Vaccinated one dose per population', 'value': 'people_vaccinated_per_population'},
@@ -54,6 +57,7 @@ option_case_type = [
 
 # Website Builder
 all_country = df.location.unique()
+
 app.layout = html.Div([
     html.Div([], className="one columns"),
     html.Div([
@@ -76,7 +80,7 @@ app.layout = html.Div([
             ], className="three columns"),
 
             html.Div(children=[
-                html.H5('📊 Case Type'),
+                html.H5('📂 Case Type'),
                 dcc.Dropdown(
                     id="dropdown-casetype",
                     options=option_case_type,
@@ -84,12 +88,42 @@ app.layout = html.Div([
                     value='total_cases',
                     multi=False,
                     clearable=False,
-                    # disabled=True
+                    searchable=False
                 ),
             ], className="three columns"),
 
             html.Div(children=[
-                html.H5(curr_time +' Time Range'),
+                html.H5('📊 Chart Type'),
+                dcc.Dropdown(
+                    id="dropdown-typechart",
+                    options=[
+                        {'label': '📈 Line Chart', 'value': 'line'},
+                        {'label': '📊 Bar Chart', 'value': 'bar'},
+                        {'label': '🗺️ World Map', 'value': 'world'},
+                    ],
+                    placeholder="Select a data source",
+                    value='line',
+                    multi=False,
+                    clearable=False,
+                    searchable=False
+                ),
+                dcc.Dropdown(
+                    id="dropdown-chartoption",
+                    options=[
+                        {'label': 'Maximum Line', 'value': 'line'},
+                        {'label': 'Average Line', 'value': 'bar'},
+                        {'label': 'Minimum Line', 'value': 'world'},
+                        {'label': 'Moving Average Line', 'value': 'world'},
+                    ],
+                    placeholder="Select an option (optional)",
+                    multi=False,
+                    clearable=False,
+                    searchable=False
+                ),
+            ], className="three columns"),
+
+            html.Div(children=[
+                html.H5(curr_time + ' Time Range'),
                 dcc.Dropdown(
                     id="dropdown-timerange",
                     options=[
@@ -103,23 +137,10 @@ app.layout = html.Div([
                     value='all',
                     multi=False,
                     clearable=False,
+                    searchable=False,
                     disabled=True
                 ),
                 # html.Button('Submit', id='submit-val', n_clicks=0),
-            ], className="three columns"),
-
-            html.Div(children=[
-                html.H5('🔢 Data Source'),
-                dcc.Dropdown(
-                    id="dropdown-datasource",
-                    options=[
-                        {'label': 'Default', 'value': 'default'},
-                    ],
-                    placeholder="Select a data source",
-                    value='default',
-                    multi=False,
-                    clearable=False
-                ),
             ], className="three columns"),
         ], className="row"),
 
@@ -142,10 +163,10 @@ app.layout = html.Div([
     [Input("dropdown-country", "value"),
      Input("dropdown-casetype", "value"),
      Input("dropdown-timerange", "value"),
-     Input("dropdown-datasource", "value")]
+     Input("dropdown-typechart", "value")]
 )
 def update_graph(countries, case_type, time_range, data_source):
-    # Data Re-categorizing
+    # -- Data Re-categorizing --
     # - Countries -
     mask = df.location.isin(countries)
     # - Time Range -
@@ -156,7 +177,7 @@ def update_graph(countries, case_type, time_range, data_source):
     else:
         title_country = str(len(countries)) + " selected countries"
 
-    # Active Case Line Chart
+    # Line Chart
     figure = px.line(
         df[mask],
         x=time_range,
