@@ -104,6 +104,7 @@ app.layout = html.Div([
                         , {'label': '📊 Bar Chart', 'value': 'bar'}
                         , {'label': '📊 Scatter Plot', 'value': 'scatter'}
                         , {'label': '📈 Area Chart', 'value': 'area'}
+                        , {'label': '🗺️ World Map', 'value': 'world'}
                     ],
                     placeholder="Select a data source",
                     value='line',
@@ -136,13 +137,13 @@ app.layout = html.Div([
                         , {'label': '2 Weeks', 'value': '14d'}
                         , {'label': '30 Days', 'value': '30d'}
                         , {'label': '90 Days', 'value': '90d'}
+                        , {'label': '365 Days', 'value': '365d'}
                     ]
                     , placeholder="Select a range"
-                    , value='all'
+                    , value='7d'
                     , multi=False
                     , clearable=False
                     , searchable=False
-                    , disabled=True
                 ),
                 # html.Button('Submit', id='submit-val', n_clicks=0),
             ], className="three columns"),
@@ -150,7 +151,7 @@ app.layout = html.Div([
 
         # Chart
         html.Div(children=[
-            dcc.Graph(id="active-case")
+            dcc.Graph(id="result-chart")
         ]),
 
         html.Div(children=[
@@ -163,7 +164,7 @@ app.layout = html.Div([
 
 
 @app.callback(
-    Output("active-case", "figure"),
+    Output("result-chart", "figure"),
     [Input("dropdown-country", "value")
         , Input("dropdown-casetype", "value")
         , Input("dropdown-timerange", "value")
@@ -171,21 +172,20 @@ app.layout = html.Div([
 )
 def update_graph(countries, case_type, time_range, type_chart):
     # -- Data Re-categorizing --
-    # - Countries -
-    mask = df.location.isin(countries)
+
     # - Time Range -
-    df = df[(df['date'] > '2021-01-01') & (df['date'] <= datetime.today())]
+    time_max = datetime.today()
+    time_list = []
+    for _ in range(1, int(time_range.replace('d', ''))):
+        time_check = (time_max - timedelta(days=_)).strftime("%Y-%m-%d")
+        # if time_check in df['date']:
+        time_list.append(time_check)
 
-    if len(countries) < 3:
-        title_country = ' and '.join([str(i) for i in countries])
-    else:
-        title_country = str(len(countries)) + " selected countries"
+    # - Apply mask -
+    mask = df['location'].isin(countries) & df['date'].isin(time_list)
 
-    title = "{} in {}".format(case_type, title_country)
-
-    if type_chart == "line":  # Line Chart
-
-        fig = px.line(df[mask]
+    if type_chart == "area":  # Line Chart
+        fig = px.area(df[mask]
                       , x="date"
                       , y=case_type
                       , color="location"
@@ -194,11 +194,12 @@ def update_graph(countries, case_type, time_range, type_chart):
                       )
         fig.update_traces(connectgaps=True)
     elif type_chart == "bar":  # Bar Chart
-
         fig = px.bar(df[mask]
                      , x="date"
                      , y=case_type
                      , color="location"
+                     , hover_name="location"
+                     , hover_data=['date', 'total_cases']
                      , barmode="group"
                      )
 
@@ -209,26 +210,48 @@ def update_graph(countries, case_type, time_range, type_chart):
                          , color="location"
                          , trendline="lowess"
                          )
-    else:  # World Map
-        fig = px.area(df[mask]
+
+    elif type_chart == "world":
+        fig = px.choropleth(df[mask]
+                            , locations="iso_code"
+                            , color=case_type
+                            , hover_name="location"
+                            , animation_frame="date"
+                            , color_continuous_scale=px.colors.sequential.deep
+                            , scope="world"
+                            )
+    else:
+        fig = px.line(df[mask]
                       , x="date"
                       , y=case_type
                       , color="location"
+                      , hover_name="location"
+                      , hover_data=['date', 'total_cases']
                       )
+        fig.update_traces(connectgaps=True)
 
-    fig.update_layout(title=title
-                      , xaxis_title="Date"
-                      , yaxis_title=str(case_type)
-                      )
+    # fig.update_layout(title=generate_title(countries, case_type)
+    #                   , xaxis_title="Date"
+    #                   , yaxis_title=str(case_type)
+    #                   )
 
     return fig
 
 
-@app.callback(
-    [Input("dropdown-casetype", "value")]
-)
-def update_countrylist(case_type):
-    return df.dropna(subset=[case_type]).unique
+def generate_title(countries, case_type):
+    if len(countries) < 3:
+        title_country = ' and '.join([str(_) for _ in countries])
+    else:
+        title_country = str(len(countries)) + " selected countries"
+
+    return "{} in {}".format(case_type, title_country)
+
+
+# @app.callback(
+#     [Input("dropdown-casetype", "value")]
+# )
+# def update_countrylist(case_type):
+#     df = df.dropna(subset=[case_type]).unique
 
 
 if __name__ == '__main__':
