@@ -24,6 +24,14 @@ url = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/o
 df = pd.read_csv(url)
 
 # Data selection
+df = df[['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases', 'total_deaths', 'new_deaths',
+         'total_cases_per_million', 'new_cases_per_million', 'total_deaths_per_million', 'new_deaths_per_million',
+         'icu_patients', 'icu_patients_per_million', 'hosp_patients', 'hosp_patients_per_million', 'new_tests',
+         'total_tests', 'total_tests_per_thousand', 'new_tests_per_thousand', 'positive_rate', 'tests_per_case',
+         'tests_units', 'total_vaccinations', 'people_vaccinated', 'people_fully_vaccinated', 'new_vaccinations',
+         'stringency_index', 'population']]
+
+# NA Data Drop
 df = df.dropna(subset=[
     'date'
     , 'continent'
@@ -31,8 +39,9 @@ df = df.dropna(subset=[
 ])
 
 # Data Transform
-df.date = pd.to_datetime(df.date)
+df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values(by=['date', 'location'])
+df['date_str'] = df['date'].apply(lambda x: str(x))
 
 # Calculate fields
 df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
@@ -76,7 +85,7 @@ app.layout = html.Div([
                     id="dropdown-casetype"
                     , options=option_case_type
                     , placeholder="Select a type"
-                    , value='total_cases'
+                    , value='new_cases'
                     , multi=False
                     , clearable=False
                     , searchable=False
@@ -140,7 +149,7 @@ app.layout = html.Div([
                         , {'label': '365 Days', 'value': '365d'}
                     ]
                     , placeholder="Select a range"
-                    , value='7d'
+                    , value='14d'
                     , multi=False
                     , clearable=False
                     , searchable=False
@@ -176,9 +185,10 @@ def update_graph(countries, case_type, time_range, type_chart):
     # - Time Range -
     time_max = datetime.today()
     time_list = []
-    for _ in range(1, int(time_range.replace('d', ''))):
-        time_check = (time_max - timedelta(days=_)).strftime("%Y-%m-%d")
+    for _ in range(1, int(time_range.replace('d', '')) + 1):
+        time_check = time_max - timedelta(days=_)
         # if time_check in df['date']:
+        time_check = time_check.strftime("%Y-%m-%d")
         time_list.append(time_check)
 
     # - Apply mask -
@@ -212,13 +222,15 @@ def update_graph(countries, case_type, time_range, type_chart):
                          )
 
     elif type_chart == "world":
+        # for _ in range(len(countries)-1):
+        #     time_list += time_list
         fig = px.choropleth(df[mask]
                             , locations="iso_code"
                             , color=case_type
                             , hover_name="location"
-                            , animation_frame="date"
-                            , color_continuous_scale=px.colors.sequential.deep
-                            , scope="world"
+                            , animation_frame="date_str"
+                            , color_continuous_scale=px.colors.sequential.Viridis
+                            , projection='kavrayskiy7'
                             )
     else:
         fig = px.line(df[mask]
@@ -230,10 +242,10 @@ def update_graph(countries, case_type, time_range, type_chart):
                       )
         fig.update_traces(connectgaps=True)
 
-    # fig.update_layout(title=generate_title(countries, case_type)
-    #                   , xaxis_title="Date"
-    #                   , yaxis_title=str(case_type)
-    #                   )
+    fig.update_layout(title=generate_title(countries, case_type)
+                      # , xaxis_title="Date"
+                      # , yaxis_title=str(case_type)
+                      )
 
     return fig
 
