@@ -243,14 +243,18 @@ def update_graph(countries, case_type, time_range, type_chart):
         fig.update_traces(connectgaps=True)
 
     fig.update_layout(title=generate_title(countries, case_type)
-                      # , xaxis_title="Date"
-                      # , yaxis_title=str(case_type)
+                      , xaxis_title="Date"
+                      , yaxis_title=get_casetype(case_type)
                       )
 
     return fig
 
 
 def generate_title(countries, case_type):
+    # Case type search
+    case_type = get_casetype(case_type)
+
+    # Country list builder
     if len(countries) < 3:
         title_country = ' and '.join([str(_) for _ in countries])
     else:
@@ -259,11 +263,8 @@ def generate_title(countries, case_type):
     return "{} in {}".format(case_type, title_country)
 
 
-# @app.callback(
-#     [Input("dropdown-casetype", "value")]
-# )
-# def update_countrylist(case_type):
-#     df = df.dropna(subset=[case_type]).unique
+def get_casetype(case_type):
+    return next((item['label'] for item in option_case_type if item["value"] == case_type), case_type)
 
 
 if __name__ == '__main__':
