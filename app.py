@@ -121,19 +121,6 @@ app.layout = html.Div([
                     clearable=False,
                     searchable=False
                 ),
-                # dcc.Dropdown(
-                #     id="dropdown-chartoption"
-                #     , options=[
-                #         {'label': 'Maximum Line', 'value': 'line'}
-                #         , {'label': 'Average Line', 'value': 'bar'}
-                #         , {'label': 'Minimum Line', 'value': 'world'}
-                #         , {'label': 'Moving Average Line', 'value': 'world'}
-                #     ]
-                #     , placeholder="Select an option (optional)"
-                #     , multi=True
-                #     , clearable=True
-                #     , searchable=False
-                # ),
             ], className="three columns"),
 
             html.Div(children=[
@@ -154,7 +141,6 @@ app.layout = html.Div([
                     , clearable=False
                     , searchable=False
                 ),
-                # html.Button('Submit', id='submit-val', n_clicks=0),
             ], className="three columns"),
         ], className="row"),
 
@@ -222,8 +208,6 @@ def update_graph(countries, case_type, time_range, type_chart):
                          )
 
     elif type_chart == "world":
-        # for _ in range(len(countries)-1):
-        #     time_list += time_list
         fig = px.choropleth(df[mask]
                             , locations="iso_code"
                             , color=case_type
