@@ -1,10 +1,10 @@
 import pandas as pd
-from dash.dependencies import Input, Output
 import dash
+from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
-import plotly.graph_objects as go
+from plotly import express as px
+from plotly import graph_objects as go
 from datetime import datetime, timedelta
 import time
 
@@ -48,6 +48,7 @@ df['date_str'] = df['date'].apply(lambda x: str(x))
 df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
 
+# all_country = sorted(df["location"].unique())
 all_country = df["location"].unique()
 
 a = int((time.time() / 900 - 3) / 2 % 24)
@@ -124,6 +125,20 @@ app.layout = html.Div([
                     multi=False,
                     clearable=False,
                     searchable=False
+                ),
+                dcc.Dropdown(
+                    id="dropdown-chartoption"
+                    , options=[
+                        {'label': 'Maximum Line', 'value': 'max'}
+                        , {'label': 'Average Line', 'value': 'average'}
+                        , {'label': 'Minimum Line', 'value': 'min'}
+                    ]
+                    , placeholder="Select an option (optional)"
+                    , multi=True
+                    , clearable=True
+                    , searchable=False
+                    # , persistence=True
+                    # , persistence_type='memory'
                 ),
             ], className="three columns"),
 
