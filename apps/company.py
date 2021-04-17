@@ -14,5 +14,13 @@ from app import app
 layout = html.Div([
     html.H2('Vaccine Deal'),
 
+    html.Div(children=[
+        dcc.Graph(id="company-result-chart")
+    ], className="twelve columns"),
+
     html.H2('Insights'),
+
+    html.Div(children=[
+        dcc.Graph(id="company-insight-dashboard")
+    ], className="twelve columns"),
 ])
