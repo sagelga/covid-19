@@ -1,11 +1,12 @@
 import pandas as pd
 import dash
+from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
-import plotly.express as px
-import time
+from plotly import express as px
+from plotly import graph_objects as go
 from datetime import datetime, timedelta
+import time
 
 # App Initialize
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -47,6 +48,7 @@ df['date_str'] = df['date'].apply(lambda x: str(x))
 df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
 
+# all_country = sorted(df["location"].unique())
 all_country = df["location"].unique()
 
 a = int((time.time() / 900 - 3) / 2 % 24)
@@ -73,12 +75,15 @@ option_case_type = [
 app.layout = html.Div([
     html.Div([], className="one columns"),
     html.Div([
-        html.Div(children=[
-            html.H1('COVID-19 Data Explorer'),
-        ]),
 
-        html.Div(children=[
+        html.H1('COVID-19 Data Explorer'),
 
+        html.Br(),
+
+        html.H2('Data'),
+
+        # Options
+        html.Div(children=[
             html.Div(children=[
                 html.H5('📂 Case Type'),
                 dcc.Dropdown(
@@ -121,6 +126,20 @@ app.layout = html.Div([
                     clearable=False,
                     searchable=False
                 ),
+                dcc.Dropdown(
+                    id="dropdown-chartoption"
+                    , options=[
+                        {'label': 'Maximum Line', 'value': 'max'}
+                        , {'label': 'Average Line', 'value': 'average'}
+                        , {'label': 'Minimum Line', 'value': 'min'}
+                    ]
+                    , placeholder="Select an option (optional)"
+                    , multi=True
+                    , clearable=True
+                    , searchable=False
+                    # , persistence=True
+                    # , persistence_type='memory'
+                ),
             ], className="three columns"),
 
             html.Div(children=[
@@ -142,31 +161,141 @@ app.layout = html.Div([
                     , searchable=False
                 ),
             ], className="three columns"),
+
         ], className="row"),
 
         # Chart
         html.Div(children=[
             dcc.Graph(id="result-chart")
-        ]),
+        ], className="twelve columns"),
+
+        html.Br(),
 
         html.Div(children=[
             html.P('Datasource from https://github.com/owid/covid-19-data/'),
             html.P('Repository : https://github.com/sagelga/covid-vaccine'),
         ]),
+
+        html.Br(),
+
+        html.Div(children=[
+            html.H2('Insights')
+        ]),
+
+        html.Div(children=[
+            html.Div(children=[
+                html.H5(curr_time + ' Time Range'),
+                dcc.Dropdown(
+                    id="dropdown-insight-timeaverage",
+                    options=[
+                        {'label': '1 Week', 'value': '7d'}
+                        , {'label': '2 Weeks', 'value': '14d'}
+                        , {'label': '30 Days', 'value': '30d'}
+                        , {'label': '90 Days', 'value': '90d'}
+                        , {'label': '365 Days', 'value': '365d'}
+                    ]
+                    , placeholder="Select a range"
+                    , value='7d'
+                    , multi=False
+                    , clearable=False
+                    , searchable=False
+                ),
+            ], className="three columns"),
+
+            html.Div(children=[
+                html.H5(curr_time + ' Time Range'),
+                dcc.Dropdown(
+                    id="dropdown-insight-timeaverage1",
+                    options=[
+                        {'label': '1 Week', 'value': '7d'}
+                        , {'label': '2 Weeks', 'value': '14d'}
+                        , {'label': '30 Days', 'value': '30d'}
+                        , {'label': '90 Days', 'value': '90d'}
+                        , {'label': '365 Days', 'value': '365d'}
+                    ]
+                    , placeholder="Select a range"
+                    , value='7d'
+                    , multi=False
+                    , clearable=False
+                    , searchable=False
+                ),
+            ], className="three columns"),
+
+            html.Div(children=[
+                html.H5(curr_time + ' Time Range'),
+                dcc.Dropdown(
+                    id="dropdown-insight-timeaverage2",
+                    options=[
+                        {'label': '1 Week', 'value': '7d'}
+                        , {'label': '2 Weeks', 'value': '14d'}
+                        , {'label': '30 Days', 'value': '30d'}
+                        , {'label': '90 Days', 'value': '90d'}
+                        , {'label': '365 Days', 'value': '365d'}
+                    ]
+                    , placeholder="Select a range"
+                    , value='7d'
+                    , multi=False
+                    , clearable=False
+                    , searchable=False
+                ),
+            ], className="three columns"),
+
+            html.Div(children=[
+                html.H5(curr_time + ' Time Range'),
+                dcc.Dropdown(
+                    id="dropdown-insight-timeaverage3",
+                    options=[
+                        {'label': '1 Week', 'value': '7d'}
+                        , {'label': '2 Weeks', 'value': '14d'}
+                        , {'label': '30 Days', 'value': '30d'}
+                        , {'label': '90 Days', 'value': '90d'}
+                        , {'label': '365 Days', 'value': '365d'}
+                    ]
+                    , placeholder="Select a range"
+                    , value='7d'
+                    , multi=False
+                    , clearable=False
+                    , searchable=False
+                ),
+            ], className="three columns"),
+
+        ], className="row"),
+
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard")
+        ], className="twelve columns"),
+
     ], className="ten columns"),
-    html.Div([], className="one columns")
-], className="row")
+    html.Div([], className="one columns"),
+])
 
 
 @app.callback(
     Output("result-chart", "figure"),
-    [Input("dropdown-country", "value")
+    [
+        Input("dropdown-country", "value")
         , Input("dropdown-casetype", "value")
         , Input("dropdown-timerange", "value")
-        , Input("dropdown-typechart", "value")]
+        , Input("dropdown-typechart", "value")
+    ]
 )
 def update_graph(countries, case_type, time_range, type_chart):
-    # -- Data Re-categorizing --
+    def add_trendline(fig):
+        fig.add_shape(
+            type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
+            x0=0, x1=1, xref="paper", y0=950, y1=950, yref="y"
+        )
+
+        fig.add_shape(
+            type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
+            x0=0, x1=1, xref="paper", y0=500, y1=500, yref="y"
+        )
+
+        fig.add_shape(
+            type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
+            x0=0, x1=1, xref="paper", y0=1500, y1=1500, yref="y"
+        )
+        return fig
 
     # - Time Range -
     time_max = datetime.today()
@@ -189,6 +318,8 @@ def update_graph(countries, case_type, time_range, type_chart):
                       , hover_data=['date', 'total_cases']
                       )
         fig.update_traces(connectgaps=True)
+        add_trendline(fig)
+
     elif type_chart == "bar":  # Bar Chart
         fig = px.bar(df[mask]
                      , x="date"
@@ -198,6 +329,7 @@ def update_graph(countries, case_type, time_range, type_chart):
                      , hover_data=['date', 'total_cases']
                      , barmode="group"
                      )
+        add_trendline(fig)
 
     elif type_chart == "scatter":
         fig = px.scatter(df[mask]
@@ -206,6 +338,7 @@ def update_graph(countries, case_type, time_range, type_chart):
                          , color="location"
                          , trendline="lowess"
                          )
+        add_trendline(fig)
 
     elif type_chart == "world":
         fig = px.choropleth(df[mask]
@@ -225,11 +358,66 @@ def update_graph(countries, case_type, time_range, type_chart):
                       , hover_data=['date', 'total_cases']
                       )
         fig.update_traces(connectgaps=True)
+        add_trendline(fig)
 
     fig.update_layout(title=generate_title(countries, case_type)
                       , xaxis_title="Date"
                       , yaxis_title=get_casetype(case_type)
                       )
+
+    return fig
+
+
+@app.callback(
+    Output("insight-dashboard", "figure"),
+    [
+        Input("dropdown-insight-timeaverage", "value")
+    ]
+)
+def update_insights(timeaverage):
+    fig = go.Figure(
+        go.Indicator(
+            mode="number+delta",
+            value=450,
+            title={
+                "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"},
+            # delta={'reference': 400, 'relative': True},
+            # domain={'x': [0.6, 1], 'y': [0, 1]}
+        ))
+
+    fig.add_trace(go.Indicator(
+        mode="number+delta",
+        value=4500,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
+
+    fig.add_trace(go.Indicator(
+        mode="number+delta",
+        value=45000,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
+
+    fig.add_trace(go.Indicator(
+        mode="number+delta",
+        value=450000,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
+
+    fig.update_layout(
+        grid={'rows': 1, 'columns': 4, 'pattern': "independent"}
+    )
 
     return fig
 
