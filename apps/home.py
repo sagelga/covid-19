@@ -243,8 +243,26 @@ layout = html.Div([
     ], className="row"),
 
     html.Div(children=[
-        dcc.Graph(id="insight-dashboard")
-    ], className="twelve columns"),
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard-1")
+        ], className="two columns"),
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard-2")
+        ], className="two columns"),
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard-3")
+        ], className="two columns"),
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard-4")
+        ], className="two columns"),
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard-5")
+        ], className="two columns"),
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard-6")
+        ], className="two columns")
+
+    ], className="row"),
 
 ])
 
@@ -348,13 +366,18 @@ def update_graph(countries, case_type, time_range, type_chart):
 
 
 @app.callback(
-    Output("insight-dashboard", "figure"),
+    Output("insight-dashboard-1", "figure"),
+    Output("insight-dashboard-2", "figure"),
+    Output("insight-dashboard-3", "figure"),
+    Output("insight-dashboard-4", "figure"),
+    Output("insight-dashboard-5", "figure"),
+    Output("insight-dashboard-6", "figure"),
     [
         Input("dropdown-insight-timeaverage", "value")
     ]
 )
 def update_insights(timeaverage):
-    fig = go.Figure(
+    fig1 = go.Figure(
         go.Indicator(
             mode="number+delta",
             value=450,
@@ -364,7 +387,7 @@ def update_insights(timeaverage):
             # domain={'x': [0.6, 1], 'y': [0, 1]}
         ))
 
-    fig.add_trace(go.Indicator(
+    fig2 = go.Figure(go.Indicator(
         mode="number+delta",
         value=4500,
         title={
@@ -374,7 +397,7 @@ def update_insights(timeaverage):
         # domain={'x': [0.6, 1], 'y': [0, 1]}
     ))
 
-    fig.add_trace(go.Indicator(
+    fig3 = go.Figure(go.Indicator(
         mode="number+delta",
         value=45000,
         title={
@@ -384,7 +407,7 @@ def update_insights(timeaverage):
         # domain={'x': [0.6, 1], 'y': [0, 1]}
     ))
 
-    fig.add_trace(go.Indicator(
+    fig4 = go.Figure(go.Indicator(
         mode="number+delta",
         value=450000,
         title={
@@ -394,11 +417,27 @@ def update_insights(timeaverage):
         # domain={'x': [0.6, 1], 'y': [0, 1]}
     ))
 
-    fig.update_layout(
-        grid={'rows': 1, 'columns': 4, 'pattern': "independent"}
-    )
+    fig5 = go.Figure(go.Indicator(
+        mode="number+delta",
+        value=450000,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
 
-    return fig
+    fig6 = go.Figure(go.Indicator(
+        mode="number+delta",
+        value=450000,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
+
+    return fig1, fig2, fig3, fig4, fig5, fig6
 
 
 def generate_title(countries, case_type):

@@ -29,13 +29,14 @@ app.layout = html.Div([
             html.Div(id='page-content', children=[])
         ]),
 
-    ], className="ten columns"),
-    html.Div([], className="one columns"),
+    ], className="eleven columns"),
+
 ])
 
 
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+              [Input('url', 'pathname')]
+              )
 def display_page(pathname):
     if pathname == '/apps/company':
         return company.layout

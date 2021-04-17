@@ -21,7 +21,7 @@ To locally develop this project, here's what you need
     ```
 2. then run the app using
     ``` bash
-    python app.py
+    python index.py
     ```
 3. Your app will run in `localhost` and `debug` mode. Please refer to Plotly/Dash documentation for more detail.
 
