@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
@@ -39,7 +40,7 @@ df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['po
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
 
 # all_country = sorted(df["location"].unique())
-all_country = df["location"].unique()
+all_country = np.sort(df["location"].unique())
 
 a = int((time.time() / 900 - 3) / 2 % 24)
 curr_time = chr(128336 + a // 2 + a % 2 * 12)
@@ -77,6 +78,8 @@ layout = html.Div([
                 , multi=False
                 , clearable=False
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
@@ -89,37 +92,45 @@ layout = html.Div([
                 , placeholder="Select a city"
                 , value=['Thailand']
                 , multi=True
+                , clearable=True
+                , searchable=True
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
         html.Div(children=[
             html.H5('📊 Chart Type'),
             dcc.Dropdown(
-                id="dropdown-typechart",
-                options=[
+                id="dropdown-typechart"
+                , options=[
                     {'label': '📈 Line Chart', 'value': 'line'}
                     , {'label': '📊 Bar Chart', 'value': 'bar'}
                     , {'label': '📊 Scatter Plot', 'value': 'scatter'}
                     , {'label': '📈 Area Chart', 'value': 'area'}
                     , {'label': '🗺️ World Map', 'value': 'world'}
-                ],
-                placeholder="Select a data source",
-                value='line',
-                multi=False,
-                clearable=False,
-                searchable=False
+                ]
+                , placeholder="Select a data source"
+                , value='line'
+                , multi=False
+                , clearable=False
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
             dcc.Dropdown(
                 id="dropdown-chartoption"
                 , options=[
-                    {'label': 'Maximum Line', 'value': 'max'}
-                    , {'label': 'Average Line', 'value': 'average'}
-                    , {'label': 'Minimum Line', 'value': 'min'}
+                    {'label': 'Highest Line', 'value': 'max'}
+                    , {'label': 'Average Line', 'value': 'avg'}
+                    , {'label': 'Lowest Line', 'value': 'min'}
                 ]
                 , placeholder="Select an option (optional)"
                 , multi=True
                 , clearable=True
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
                 # , persistence=True
                 # , persistence_type='memory'
             ),
@@ -142,6 +153,8 @@ layout = html.Div([
                 , multi=False
                 , clearable=False
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
@@ -180,6 +193,8 @@ layout = html.Div([
                 , multi=False
                 , clearable=False
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
@@ -199,6 +214,8 @@ layout = html.Div([
                 , multi=False
                 , clearable=False
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
@@ -218,6 +235,8 @@ layout = html.Div([
                 , multi=False
                 , clearable=False
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
@@ -237,6 +256,8 @@ layout = html.Div([
                 , multi=False
                 , clearable=False
                 , searchable=False
+                , persistence=True
+                , persistence_type='session'
             ),
         ], className="three columns"),
 
@@ -252,30 +273,14 @@ layout = html.Div([
 @app.callback(
     Output("result-chart", "figure"),
     [
-        Input("dropdown-country", "value")
-        , Input("dropdown-casetype", "value")
-        , Input("dropdown-timerange", "value")
+        Input("dropdown-casetype", "value")
+        , Input("dropdown-country", "value")
         , Input("dropdown-typechart", "value")
+        , Input("dropdown-chartoption", "value")
+        , Input("dropdown-timerange", "value")
     ]
 )
-def update_graph(countries, case_type, time_range, type_chart):
-    def add_trendline(fig):
-        fig.add_shape(
-            type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-            x0=0, x1=1, xref="paper", y0=950, y1=950, yref="y"
-        )
-
-        fig.add_shape(
-            type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-            x0=0, x1=1, xref="paper", y0=500, y1=500, yref="y"
-        )
-
-        fig.add_shape(
-            type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-            x0=0, x1=1, xref="paper", y0=1500, y1=1500, yref="y"
-        )
-        return fig
-
+def update_graph(case_type, countries, type_chart, chart_option, time_range):
     # - Time Range -
     time_max = datetime.today()
     time_list = []
@@ -294,10 +299,11 @@ def update_graph(countries, case_type, time_range, type_chart):
                       , y=case_type
                       , color="location"
                       , hover_name="location"
-                      , hover_data=['date', 'total_cases']
                       )
-        fig.update_traces(connectgaps=True)
-        add_trendline(fig)
+        fig.update_traces(connectgaps=True
+                          , mode="markers+lines"
+                          , hovertemplate=None)
+        fig.update_layout(hovermode="x unified")
 
     elif type_chart == "bar":  # Bar Chart
         fig = px.bar(df[mask]
@@ -305,10 +311,8 @@ def update_graph(countries, case_type, time_range, type_chart):
                      , y=case_type
                      , color="location"
                      , hover_name="location"
-                     , hover_data=['date', 'total_cases']
                      , barmode="group"
                      )
-        add_trendline(fig)
 
     elif type_chart == "scatter":
         fig = px.scatter(df[mask]
@@ -317,7 +321,6 @@ def update_graph(countries, case_type, time_range, type_chart):
                          , color="location"
                          , trendline="lowess"
                          )
-        add_trendline(fig)
 
     elif type_chart == "world":
         fig = px.choropleth(df[mask]
@@ -334,15 +337,39 @@ def update_graph(countries, case_type, time_range, type_chart):
                       , y=case_type
                       , color="location"
                       , hover_name="location"
-                      , hover_data=['date', 'total_cases']
                       )
-        fig.update_traces(connectgaps=True)
-        add_trendline(fig)
+        fig.update_traces(connectgaps=True
+                          , mode="markers+lines"
+                          , hovertemplate=None)
+        fig.update_layout(hovermode="x unified")
 
+    # Add chart axis label
     fig.update_layout(title=generate_title(countries, case_type)
                       , xaxis_title="Date"
                       , yaxis_title=get_casetype(case_type)
                       )
+
+    if type_chart not in ['world'] and type(chart_option) == list:
+        # Max Line
+        if 'max' in chart_option:
+            fig.add_shape(
+                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
+                x0=0, x1=1, xref="paper", y0=1500, y1=1500, yref="y"
+            )
+
+        # Average Line
+        if 'avg' in chart_option:
+            fig.add_shape(
+                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
+                x0=0, x1=1, xref="paper", y0=950, y1=950, yref="y"
+            )
+
+        # Min Line
+        if 'min' in chart_option:
+            fig.add_shape(
+                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
+                x0=0, x1=1, xref="paper", y0=500, y1=500, yref="y"
+            )
 
     return fig
 
