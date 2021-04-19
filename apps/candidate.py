@@ -10,6 +10,10 @@ import time
 
 from app import app
 
+# Data Import
+url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-primary.csv'
+df = pd.read_csv(url)
+
 # Website Builder
 layout = html.Div([
     html.H2('Vaccine Deal'),
@@ -24,3 +28,15 @@ layout = html.Div([
         dcc.Graph(id="company-insight-dashboard")
     ], className="twelve columns"),
 ])
+
+
+@app.callback(
+    Output("company-result-chart", "figure"),
+    # [
+    #     Input("dropdown-insight-timeaverage", "value")
+    # ]
+)
+def company_result_chart():
+    fig = px.bar()
+
+    return fig
