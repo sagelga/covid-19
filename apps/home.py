@@ -64,12 +64,14 @@ option_case_type = [
 
 # Website Builder
 layout = html.Div([
-    html.H2('Data'),
-
+    html.Div(children=[
+        html.H2('Data'),
+        html.P('Select indicators from the dropdown menu.')
+    ]),
     # Options
     html.Div(children=[
         html.Div(children=[
-            html.H5('📂 Case Type'),
+            html.Label('📂 Case Type'),
             dcc.Dropdown(
                 id="dropdown-casetype"
                 , options=option_case_type
@@ -84,7 +86,7 @@ layout = html.Div([
         ], className="three columns"),
 
         html.Div(children=[
-            html.H5('🌎 Countries'),
+            html.Label('🌎 Countries'),
             dcc.Dropdown(
                 id="dropdown-country"
                 , options=[{"label": x, "value": x}
@@ -100,7 +102,7 @@ layout = html.Div([
         ], className="three columns"),
 
         html.Div(children=[
-            html.H5('📊 Chart Type'),
+            html.Label('📊 Chart Type'),
             dcc.Dropdown(
                 id="dropdown-typechart"
                 , options=[
@@ -118,26 +120,10 @@ layout = html.Div([
                 , persistence=True
                 , persistence_type='session'
             ),
-            dcc.Dropdown(
-                id="dropdown-chartoption"
-                , options=[
-                    {'label': 'Highest Line', 'value': 'max'}
-                    , {'label': 'Average Line', 'value': 'avg'}
-                    , {'label': 'Lowest Line', 'value': 'min'}
-                ]
-                , placeholder="Select an option (optional)"
-                , multi=True
-                , clearable=True
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-                # , persistence=True
-                # , persistence_type='memory'
-            ),
         ], className="three columns"),
 
         html.Div(children=[
-            html.H5(curr_time + ' Time Range'),
+            html.Label(curr_time + ' Time Range'),
             dcc.Dropdown(
                 id="dropdown-timerange",
                 options=[
@@ -165,107 +151,102 @@ layout = html.Div([
         dcc.Graph(id="result-chart")
     ], className="twelve columns"),
 
+    html.Div(children=[
+        html.Div(children=[
+            html.Label('📊 Chart Indicators'),
+            dcc.Dropdown(
+                id="dropdown-chartoption"
+                , options=[
+                    {'label': 'Highest Threshold', 'value': 'max'}
+                    , {'label': 'Average Threshold', 'value': 'avg'}
+                    , {'label': 'Lowest Threshold', 'value': 'min'}
+                ]
+                , placeholder="Select an option (optional)"
+                , multi=True
+                , clearable=True
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
+                # , persistence=True
+                # , persistence_type='memory'
+            ),
+        ], className='three columns'),
+        html.Div(children=[
+            html.Label('📊 Regression Line'),
+            dcc.Dropdown(
+                id="dropdown-regressionoption"
+                , options=[
+                    {'label': 'Linear Regression Trend Line', 'value': 'linear'}
+                    , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
+                ]
+                , placeholder="Select an option (optional)"
+                , multi=True
+                , clearable=True
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
+                # , persistence=True
+                # , persistence_type='memory'
+            ),
+        ], className='three columns'),
+    ], className='row'),
+
     html.Br(),
 
     html.Div(children=[
-        html.P('Datasource from https://github.com/owid/covid-19-data/'),
-        html.P('Repository : https://github.com/sagelga/covid-vaccine'),
+        html.H2('Insights'),
+        html.P(
+            'These are insights from your data selection. If you like to change the insight section, try adding/removing a country from the dropdown above.')
     ]),
 
-    html.Br(),
+    html.Div(children=[
+        html.Div(children=[
+            html.Div(children=[
+                dcc.Graph(id="insight-dashboard")
+            ], className="four columns"),
+            html.Div(children=[
+                html.H5('Title 1'),
+                html.P(
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
+            ], className="eight columns"),
+        ], className="six columns"),
 
-    html.H2('Insights'),
+        html.Div(children=[
+            html.Div(children=[
+                dcc.Graph(id="insight-dashboard")
+            ], className="four columns"),
+            html.Div(children=[
+                html.H5('Title 2'),
+                html.P(
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
+            ], className="eight columns"),
+        ], className="six columns"),
+    ], className='row'),
 
     html.Div(children=[
         html.Div(children=[
-            html.H5(curr_time + ' Time Range'),
-            dcc.Dropdown(
-                id="dropdown-insight-timeaverage",
-                options=[
-                    {'label': '1 Week', 'value': '7d'}
-                    , {'label': '2 Weeks', 'value': '14d'}
-                    , {'label': '30 Days', 'value': '30d'}
-                    , {'label': '90 Days', 'value': '90d'}
-                    , {'label': '365 Days', 'value': '365d'}
-                ]
-                , placeholder="Select a range"
-                , value='7d'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
+            html.Div(children=[
+                dcc.Graph(id="insight-dashboard")
+            ], className="four columns"),
+            html.Div(children=[
+                html.H5('Title 3'),
+                html.P(
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
+            ], className="eight columns"),
+        ], className="six columns"),
 
         html.Div(children=[
-            html.H5(curr_time + ' Time Range'),
-            dcc.Dropdown(
-                id="dropdown-insight-timeaverage1",
-                options=[
-                    {'label': '1 Week', 'value': '7d'}
-                    , {'label': '2 Weeks', 'value': '14d'}
-                    , {'label': '30 Days', 'value': '30d'}
-                    , {'label': '90 Days', 'value': '90d'}
-                    , {'label': '365 Days', 'value': '365d'}
-                ]
-                , placeholder="Select a range"
-                , value='7d'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
+            html.Div(children=[
+                dcc.Graph(id="insight-dashboard")
+            ], className="four columns"),
+            html.Div(children=[
+                html.H5('Title 4'),
+                html.P(
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
+            ], className="eight columns"),
+        ], className="six columns"),
 
-        html.Div(children=[
-            html.H5(curr_time + ' Time Range'),
-            dcc.Dropdown(
-                id="dropdown-insight-timeaverage2",
-                options=[
-                    {'label': '1 Week', 'value': '7d'}
-                    , {'label': '2 Weeks', 'value': '14d'}
-                    , {'label': '30 Days', 'value': '30d'}
-                    , {'label': '90 Days', 'value': '90d'}
-                    , {'label': '365 Days', 'value': '365d'}
-                ]
-                , placeholder="Select a range"
-                , value='7d'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
-
-        html.Div(children=[
-            html.H5(curr_time + ' Time Range'),
-            dcc.Dropdown(
-                id="dropdown-insight-timeaverage3",
-                options=[
-                    {'label': '1 Week', 'value': '7d'}
-                    , {'label': '2 Weeks', 'value': '14d'}
-                    , {'label': '30 Days', 'value': '30d'}
-                    , {'label': '90 Days', 'value': '90d'}
-                    , {'label': '365 Days', 'value': '365d'}
-                ]
-                , placeholder="Select a range"
-                , value='7d'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
-
-    ], className="row"),
-
-    html.Div(children=[
-        dcc.Graph(id="insight-dashboard")
-    ], className="twelve columns"),
+    ], className='row'),
 
 ])
 
@@ -280,7 +261,7 @@ layout = html.Div([
         , Input("dropdown-timerange", "value")
     ]
 )
-def update_graph(case_type, countries, type_chart, chart_option, time_range):
+def update_graph(case_type, countries, type_chart, chart_indicator, time_range):
     # - Time Range -
     time_max = datetime.today()
     time_list = []
@@ -319,7 +300,7 @@ def update_graph(case_type, countries, type_chart, chart_option, time_range):
                          , x="date"
                          , y=case_type
                          , color="location"
-                         , trendline="lowess"
+                         # , trendline="lowess"
                          )
 
     elif type_chart == "world":
@@ -349,26 +330,32 @@ def update_graph(case_type, countries, type_chart, chart_option, time_range):
                       , yaxis_title=get_casetype(case_type)
                       )
 
-    if type_chart not in ['world'] and type(chart_option) == list:
+    if type(chart_indicator) == list and type_chart not in ['world']:
+        # Retrieve data
+        # df[mask]
+
         # Max Line
-        if 'max' in chart_option:
+        if 'max' in chart_indicator:
+            y = 1200
             fig.add_shape(
                 type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=1500, y1=1500, yref="y"
+                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
             )
 
         # Average Line
-        if 'avg' in chart_option:
+        if 'avg' in chart_indicator:
+            y = 900
             fig.add_shape(
                 type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=950, y1=950, yref="y"
+                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
             )
 
         # Min Line
-        if 'min' in chart_option:
+        if 'min' in chart_indicator:
+            y = 500
             fig.add_shape(
                 type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=500, y1=500, yref="y"
+                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
             )
 
     return fig
