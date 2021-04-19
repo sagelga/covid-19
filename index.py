@@ -21,7 +21,9 @@ app.layout = html.Div([
                 dcc.Location(id='url', refresh=False),
                 html.Div([
                     dcc.Link('Home', href='/'),
-                    dcc.Link('Case Compare', href='/compare'),
+                    dcc.Link(' ● ', href=''),
+                    dcc.Link('World Trends', href='/compare'),
+                    dcc.Link(' ● ', href=''),
                     dcc.Link('Vaccine Candidate', href='/candidate'),
                 ], className="row"),
             ]),
