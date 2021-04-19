@@ -11,26 +11,38 @@ from apps import company
 
 # Website Builder
 app.layout = html.Div([
-    html.Div([], className="one columns"),
     html.Div([
-        html.H1('COVID-19 Data Explorer'),
-
-        html.Nav([
-            dcc.Location(id='url', refresh=False),
-            html.Div([
-                dcc.Link('Home', href='/'),
-                dcc.Link('Vaccine Company', href='/apps/company'),
-            ], className="row"),
-        ]),
-
-        html.Br(),
-
+        html.Div([], className="one columns"),
         html.Div([
-            html.Div(id='page-content', children=[])
-        ]),
+            html.H1('COVID-19 Data Explorer'),
 
-    ], className="ten columns"),
-    html.Div([], className="one columns"),
+            html.Nav([
+                dcc.Location(id='url', refresh=False),
+                html.Div([
+                    dcc.Link('Home', href='/'),
+                    dcc.Link('Vaccine Company', href='/apps/company'),
+                ], className="row"),
+            ]),
+
+            html.Br(),
+
+            html.Div([
+                html.Div(id='page-content', children=[])
+            ]),
+
+        ], className="ten columns"),
+
+        html.Div([], className="one columns"),
+
+    ], className="row"),
+
+    # Footer Area
+    html.Br(),
+    html.Div(children=[
+        html.Center('Source : Our World in Data'),
+        html.Center('Created with ❤️ by @sagelga'),
+    ], className="footer"),
+
 ])
 
 
