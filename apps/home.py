@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import dash
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, ALL
 import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
@@ -61,6 +61,21 @@ option_case_type = [
     , {'label': 'Vaccinated one dose per population', 'value': 'people_vaccinated_per_population'}
     , {'label': 'Vaccinated all doses per population', 'value': 'people_fully_vaccinated_per_population'}
 ]
+
+
+def generate_insight_cards(id, title, p):
+    return html.Div(children=[
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard{}".format(id))
+        ], className="four columns"),
+        html.Div(children=[
+            html.H5(title),
+            html.P(p,
+                   style={'align': 'justify'}
+                   ),
+        ], className="eight columns"),
+    ], className="six columns")
+
 
 # Website Builder
 layout = html.Div([
@@ -199,55 +214,10 @@ layout = html.Div([
             'These are insights from your data selection. If you like to change the insight section, try adding/removing a country from the dropdown above.')
     ]),
 
-    html.Div(children=[
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 1'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 2'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-    ], className='row'),
-
-    html.Div(children=[
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 3'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 4'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-
-    ], className='row'),
-
+    generate_insight_cards(1, 'Title', 'Subtitle'),
+    generate_insight_cards(2, 'Title', 'Subtitle'),
+    generate_insight_cards(3, 'Title', 'Subtitle'),
+    generate_insight_cards(4, 'Title', 'Subtitle'),
 ])
 
 
