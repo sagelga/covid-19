@@ -128,14 +128,14 @@ layout = html.Div([
                 id="dropdown-timerange",
                 options=[
                     {'label': 'All time', 'value': 'all'}
-                    , {'label': '1 Week', 'value': '7d'}
-                    , {'label': '2 Weeks', 'value': '14d'}
-                    , {'label': '30 Days', 'value': '30d'}
-                    , {'label': '90 Days', 'value': '90d'}
-                    , {'label': '365 Days', 'value': '365d'}
+                    , {'label': '7 Days', 'value': '7'}
+                    , {'label': '14 Days', 'value': '14'}
+                    , {'label': '30 Days', 'value': '30'}
+                    , {'label': '90 Days', 'value': '90'}
+                    , {'label': '365 Days', 'value': '365'}
                 ]
                 , placeholder="Select a range"
-                , value='14d'
+                , value='14'
                 , multi=False
                 , clearable=False
                 , searchable=False
@@ -262,17 +262,20 @@ layout = html.Div([
     ]
 )
 def update_graph(case_type, countries, type_chart, chart_indicator, time_range):
-    # - Time Range -
-    time_max = datetime.today()
-    time_list = []
-    for _ in range(1, int(time_range.replace('d', '')) + 1):
-        time_check = time_max - timedelta(days=_)
-        # if time_check in df['date']:
-        time_check = time_check.strftime("%Y-%m-%d")
-        time_list.append(time_check)
+    if time_range != 'all':
+        # - Time Range -
+        time_max = datetime.today()
+        time_list = []
+        for _ in range(1, int(time_range) + 1):
+            time_check = time_max - timedelta(days=_)
+            # if time_check in df['date']:
+            time_check = time_check.strftime("%Y-%m-%d")
+            time_list.append(time_check)
 
-    # - Apply mask -
-    mask = df['location'].isin(countries) & df['date'].isin(time_list)
+        # - Apply mask -
+        mask = df['location'].isin(countries) & df['date'].isin(time_list)
+    else:
+        mask = df['location'].isin(countries)
 
     if type_chart == "area":  # Line Chart
         fig = px.area(df[mask]
