@@ -17,7 +17,7 @@ df = pd.read_csv(url)
 
 # Select data
 df = df[['Buyer/recipient', 'Vaccine candidate', 'Deal Type', 'Finalized Commitment', 'Doses committed (in millions)',
-         'Price (in USD million)', 'Doses/capita', 'Population covered']]
+         'Price (in USD million)', 'Price/Dose (in USD)', 'Doses/capita', 'Population covered']]
 df = df.dropna()
 
 # Sort data using Buyer + Vaccine candidate
@@ -26,8 +26,8 @@ df = df.sort_values(by=['Buyer/recipient', 'Vaccine candidate'])
 all_buyer = df['Buyer/recipient'].unique()
 # all_candidates = df['Vaccine candidate'].unique()
 price_options = [
-    {'label': 'Vaccine Name: A-Z', 'value': 'name'}
-    , {'label': 'Vaccine Price: (Ascending) ', 'value': 'price'}
+    {'label': 'Vaccine Name', 'value': 'name'}
+    , {'label': 'Vaccine Price', 'value': 'price'}
 ]
 
 # Vaccine Provider Card Import
@@ -121,7 +121,7 @@ layout = html.Div([
 
     html.Div([
         html.H2('Vaccine Price'),
-
+        html.P('DISCLAIMER : Only showing Public prices. Any private Private price deals are excluded.'),
         html.Div([
             html.Div([], className='ten columns'),
             html.Div([
@@ -201,7 +201,7 @@ layout = html.Div([
     Output("candidate-graph-vaccinecount", "figure"),
     Input("candidate-dropdown-chartoption-buyer", "value")
 )
-def company_result_chart(buyer):
+def candidate_graph_vaccinecount(buyer):
     mask = df['Buyer/recipient'].isin(buyer)
 
     fig = px.bar(df[mask], x="Buyer/recipient", y="Doses committed (in millions)", color="Vaccine candidate")
@@ -215,6 +215,15 @@ def company_result_chart(buyer):
 
     return fig
 
+
+@app.callback(
+    Output("candidate-graph-price", "figure"),
+    [Input("candidate-dropdown-priceoption-category", "value")
+        , Input("candidate-dropdown-priceoption-order", "value")]
+)
+def candidate_graph_vaccineprice(order_category, order):
+    fig = px.box(df, x='Vaccine candidate', y='Price/Dose (in USD)')
+    return fig
 # @app.callback(
 #     Output("candidate-heading-candidateinfo-cards", "children")
 #     [
