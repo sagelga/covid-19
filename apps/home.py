@@ -86,21 +86,6 @@ layout = html.Div([
     # Options
     html.Div(children=[
         html.Div(children=[
-            html.Label('📂 Case Type'),
-            dcc.Dropdown(
-                id="dropdown-casetype"
-                , options=option_case_type
-                , placeholder="Select a type"
-                , value='new_cases'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
-
-        html.Div(children=[
             html.Label('🌎 Countries'),
             dcc.Dropdown(
                 id="dropdown-country"
@@ -114,8 +99,30 @@ layout = html.Div([
                 , persistence=True
                 , persistence_type='session'
             ),
-        ], className="three columns"),
+        ], className="nine columns"),
 
+        html.Div(children=[
+            html.Label('📂 Case Type'),
+            dcc.Dropdown(
+                id="dropdown-casetype"
+                , options=option_case_type
+                , placeholder="Select a type"
+                , value='new_cases'
+                , multi=False
+                , clearable=False
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
+            ),
+        ], className="three columns"),
+    ], className="row"),
+
+    # Chart
+    html.Div(children=[
+        dcc.Graph(id="result-chart")
+    ], className="twelve columns"),
+
+    html.Div(children=[
         html.Div(children=[
             html.Label('📊 Chart Type'),
             dcc.Dropdown(
@@ -147,6 +154,7 @@ layout = html.Div([
                     , {'label': '14 Days', 'value': '14'}
                     , {'label': '30 Days', 'value': '30'}
                     , {'label': '90 Days', 'value': '90'}
+                    , {'label': '180 Days', 'value': '180'}
                     , {'label': '365 Days', 'value': '365'}
                 ]
                 , placeholder="Select a range"
@@ -159,14 +167,6 @@ layout = html.Div([
             ),
         ], className="three columns"),
 
-    ], className="row"),
-
-    # Chart
-    html.Div(children=[
-        dcc.Graph(id="result-chart")
-    ], className="twelve columns"),
-
-    html.Div(children=[
         html.Div(children=[
             html.Label('📊 Chart Indicators'),
             dcc.Dropdown(
