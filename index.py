@@ -7,7 +7,8 @@ from app import server
 
 # Connect to your app pages
 from apps import home
-from apps import company
+from apps import compare
+from apps import candidate
 
 # Website Builder
 app.layout = html.Div([
@@ -20,7 +21,10 @@ app.layout = html.Div([
                 dcc.Location(id='url', refresh=False),
                 html.Div([
                     dcc.Link('Home', href='/'),
-                    dcc.Link('Vaccine Company', href='/apps/company'),
+                    dcc.Link(' ● ', href=''),
+                    dcc.Link('World Trends', href='/compare'),
+                    dcc.Link(' ● ', href=''),
+                    dcc.Link('Vaccine Candidate', href='/candidate'),
                 ], className="row"),
             ]),
 
@@ -47,12 +51,16 @@ app.layout = html.Div([
 
 
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+              [Input('url', 'pathname')]
+              )
 def display_page(pathname):
-    if pathname == '/apps/company':
-        return company.layout
-    else:
-        return home.layout
+    if pathname == '/candidate':
+        return candidate.layout
+    if pathname == '/compare':
+        return compare.layout
+
+    # If URL does not match any page, returns to home layout
+    return home.layout
 
 
 if __name__ == '__main__':

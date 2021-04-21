@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import dash
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, ALL
 import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
@@ -62,6 +62,21 @@ option_case_type = [
     , {'label': 'Vaccinated all doses per population', 'value': 'people_fully_vaccinated_per_population'}
 ]
 
+
+def generate_insight_cards(id, title, p):
+    return html.Div(children=[
+        html.Div(children=[
+            dcc.Graph(id="insight-dashboard{}".format(id))
+        ], className="four columns"),
+        html.Div(children=[
+            html.H5(title),
+            html.P(p,
+                   style={'align': 'justify'}
+                   ),
+        ], className="eight columns"),
+    ], className="six columns")
+
+
 # Website Builder
 layout = html.Div([
     html.Div(children=[
@@ -70,21 +85,6 @@ layout = html.Div([
     ]),
     # Options
     html.Div(children=[
-        html.Div(children=[
-            html.Label('📂 Case Type'),
-            dcc.Dropdown(
-                id="dropdown-casetype"
-                , options=option_case_type
-                , placeholder="Select a type"
-                , value='new_cases'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
-
         html.Div(children=[
             html.Label('🌎 Countries'),
             dcc.Dropdown(
@@ -99,8 +99,30 @@ layout = html.Div([
                 , persistence=True
                 , persistence_type='session'
             ),
-        ], className="three columns"),
+        ], className="nine columns"),
 
+        html.Div(children=[
+            html.Label('📂 Case Type'),
+            dcc.Dropdown(
+                id="dropdown-casetype"
+                , options=option_case_type
+                , placeholder="Select a type"
+                , value='new_cases'
+                , multi=False
+                , clearable=False
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
+            ),
+        ], className="three columns"),
+    ], className="row"),
+
+    # Chart
+    html.Div(children=[
+        dcc.Graph(id="result-chart")
+    ], className="twelve columns"),
+
+    html.Div(children=[
         html.Div(children=[
             html.Label('📊 Chart Type'),
             dcc.Dropdown(
@@ -132,6 +154,7 @@ layout = html.Div([
                     , {'label': '14 Days', 'value': '14'}
                     , {'label': '30 Days', 'value': '30'}
                     , {'label': '90 Days', 'value': '90'}
+                    , {'label': '180 Days', 'value': '180'}
                     , {'label': '365 Days', 'value': '365'}
                 ]
                 , placeholder="Select a range"
@@ -144,14 +167,6 @@ layout = html.Div([
             ),
         ], className="three columns"),
 
-    ], className="row"),
-
-    # Chart
-    html.Div(children=[
-        dcc.Graph(id="result-chart")
-    ], className="twelve columns"),
-
-    html.Div(children=[
         html.Div(children=[
             html.Label('📊 Chart Indicators'),
             dcc.Dropdown(
@@ -199,55 +214,10 @@ layout = html.Div([
             'These are insights from your data selection. If you like to change the insight section, try adding/removing a country from the dropdown above.')
     ]),
 
-    html.Div(children=[
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 1'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 2'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-    ], className='row'),
-
-    html.Div(children=[
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 3'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-
-        html.Div(children=[
-            html.Div(children=[
-                dcc.Graph(id="insight-dashboard")
-            ], className="four columns"),
-            html.Div(children=[
-                html.H5('Title 4'),
-                html.P(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tortor dolor, convallis ut dui sed, venenatis finibus augue. Nunc quis velit et massa suscipit tristique non eu sapien. Etiam nisl urna, finibus ut risus vitae, commodo aliquet neque. Vivamus euismod leo tincidunt, efficitur massa non, placerat enim. Cras sit amet facilisis risus. Nam eget dignissim metus, id iaculis enim. Proin viverra ipsum tortor. Nunc id sapien massa. Praesent vel felis lectus. Aenean sit amet sem vitae mi iaculis luctus. Curabitur at venenatis urna. Mauris felis erat, bibendum in dui quis, volutpat ornare felis.'),
-            ], className="eight columns"),
-        ], className="six columns"),
-
-    ], className='row'),
-
+    generate_insight_cards(1, 'Title', 'Subtitle'),
+    generate_insight_cards(2, 'Title', 'Subtitle'),
+    generate_insight_cards(3, 'Title', 'Subtitle'),
+    generate_insight_cards(4, 'Title', 'Subtitle'),
 ])
 
 
@@ -365,13 +335,18 @@ def update_graph(case_type, countries, type_chart, chart_indicator, time_range):
 
 
 @app.callback(
-    Output("insight-dashboard", "figure"),
+    Output("insight-dashboard-1", "figure"),
+    Output("insight-dashboard-2", "figure"),
+    Output("insight-dashboard-3", "figure"),
+    Output("insight-dashboard-4", "figure"),
+    Output("insight-dashboard-5", "figure"),
+    Output("insight-dashboard-6", "figure"),
     [
         Input("dropdown-insight-timeaverage", "value")
     ]
 )
 def update_insights(timeaverage):
-    fig = go.Figure(
+    fig1 = go.Figure(
         go.Indicator(
             mode="number+delta",
             value=450,
@@ -381,7 +356,7 @@ def update_insights(timeaverage):
             # domain={'x': [0.6, 1], 'y': [0, 1]}
         ))
 
-    fig.add_trace(go.Indicator(
+    fig2 = go.Figure(go.Indicator(
         mode="number+delta",
         value=4500,
         title={
@@ -391,7 +366,7 @@ def update_insights(timeaverage):
         # domain={'x': [0.6, 1], 'y': [0, 1]}
     ))
 
-    fig.add_trace(go.Indicator(
+    fig3 = go.Figure(go.Indicator(
         mode="number+delta",
         value=45000,
         title={
@@ -401,7 +376,7 @@ def update_insights(timeaverage):
         # domain={'x': [0.6, 1], 'y': [0, 1]}
     ))
 
-    fig.add_trace(go.Indicator(
+    fig4 = go.Figure(go.Indicator(
         mode="number+delta",
         value=450000,
         title={
@@ -411,11 +386,27 @@ def update_insights(timeaverage):
         # domain={'x': [0.6, 1], 'y': [0, 1]}
     ))
 
-    fig.update_layout(
-        grid={'rows': 1, 'columns': 4, 'pattern': "independent"}
-    )
+    fig5 = go.Figure(go.Indicator(
+        mode="number+delta",
+        value=450000,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
 
-    return fig
+    fig6 = go.Figure(go.Indicator(
+        mode="number+delta",
+        value=450000,
+        title={
+            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
+        },
+        # delta={'reference': 400, 'relative': True},
+        # domain={'x': [0.6, 1], 'y': [0, 1]}
+    ))
+
+    return fig1, fig2, fig3, fig4, fig5, fig6
 
 
 def generate_title(countries, case_type):
