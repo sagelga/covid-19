@@ -22,8 +22,6 @@ app.layout = html.Div([
                 html.Div([
                     dcc.Link('Home', href='/'),
                     dcc.Link(' ● ', href=''),
-                    dcc.Link('World Trends', href='/compare'),
-                    dcc.Link(' ● ', href=''),
                     dcc.Link('Vaccine Candidate', href='/candidate'),
                 ], className="row"),
             ]),
@@ -56,8 +54,6 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/candidate':
         return candidate.layout
-    if pathname == '/compare':
-        return compare.layout
 
     # If URL does not match any page, returns to home layout
     return home.layout
