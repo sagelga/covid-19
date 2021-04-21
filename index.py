@@ -7,7 +7,6 @@ from app import server
 
 # Connect to your app pages
 from apps import home
-from apps import compare
 from apps import candidate
 
 # Website Builder
