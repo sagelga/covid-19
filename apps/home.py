@@ -33,7 +33,6 @@ df = df.dropna(subset=[
 # Data Transform
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values(by=['date', 'location'])
-df['date_str'] = df['date'].apply(lambda x: str(x))
 
 # Calculate fields
 df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
@@ -114,10 +113,9 @@ layout = html.Div([
                 id="home-dropdown-charttype"
                 , options=[
                     {'label': '📈 Line Chart', 'value': 'line'}
-                    , {'label': '📊 Bar Chart', 'value': 'bar'}
                     , {'label': '📊 Scatter Plot', 'value': 'scatter'}
-                    , {'label': '📈 Area Chart', 'value': 'area'}
-                    , {'label': '🗺️ World Map', 'value': 'world'}
+                    , {'label': '📊 Stacked Bar Chart', 'value': 'bar'}
+                    , {'label': '📈 Stacked Area Chart', 'value': 'area'}
                 ]
                 , placeholder="Select a data source"
                 , value='line'
@@ -191,6 +189,60 @@ layout = html.Div([
         ], className='three columns'),
     ], className='row'),
 
+    html.Br(),
+
+    html.Div(children=[
+        html.H2('Predictions'),
+        html.P(
+            'DISCLAIMER : This is only a statistical predictions only. Predicted data may not reflects real-world scenario.')
+    ]),
+
+    html.Div([
+        html.Div([
+            html.Label(curr_time + ' Time Range'),
+            dcc.Dropdown(
+                id="home-dropdown-prediction-time",
+                options=[
+                    {'label': 'All time', 'value': 'all'}
+                    , {'label': '7 Days', 'value': '7'}
+                    , {'label': '14 Days', 'value': '14'}
+                    , {'label': '30 Days', 'value': '30'}
+                    , {'label': '90 Days', 'value': '90'}
+                    , {'label': '180 Days', 'value': '180'}
+                    , {'label': '365 Days', 'value': '365'}
+                ]
+                , placeholder="Select a range"
+                , value='14'
+                , multi=False
+                , clearable=False
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
+            ),
+        ], className="three columns"),
+
+        html.Div([
+            html.Label('📊 Regression Line'),
+            dcc.Dropdown(
+                id="home-dropdown-prediction-method"
+                , options=[
+                    {'label': 'Linear Regression Trend Line', 'value': 'linear'}
+                    , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
+                ]
+                , placeholder="Select an option (optional)"
+                , multi=True
+                , clearable=True
+                , searchable=False
+                , persistence=True
+                , persistence_type='session'
+                # , persistence=True
+                # , persistence_type='memory'
+            ),
+        ], className='three columns'),
+    ], className='row'),
+
+    dcc.Graph(),
+
 ])
 
 
@@ -211,7 +263,7 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator, 
         return go.Figure(go.Indicator(
             mode="number", value=400,
             title={
-                "text": "Bad Request<br><span style='font-size:0.8em;color:gray'>Please select a country to continue</span>"},
+                "text": "Bad Request<br><span style='font-size:0.8em;color:gray'>Please select <b>at least one</b> country to continue</span>"},
             domain={'y': [0, 1], 'x': [0.25, 0.75]}))
 
     # - Time Range -
@@ -227,9 +279,12 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator, 
 
     # - Chart Type -
     if chart_type == "area":  # Line Chart
-        fig = px.area(df[mask], x="date", y=case_type
+        fig = px.area(df[mask]
+                      , x="date"
+                      , y=case_type
                       , color="location"
                       , hover_name="location"
+                      , hover_data=[case_type]
                       )
         fig.update_traces(connectgaps=True
                           , mode="markers+lines"
@@ -237,42 +292,38 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator, 
         fig.update_layout(hovermode="x unified")
 
     elif chart_type == "bar":  # Bar Chart
-        fig = px.bar(df[mask], x="date", y=case_type
+        fig = px.bar(df[mask]
+                     , x="date"
+                     , y=case_type
                      , color="location"
-                     , hover_name="location"
-                     , barmode="group"
+                     , hover_data=[case_type]
+                     , barmode="stack"
                      )
 
     elif chart_type == "scatter":
-        fig = px.scatter(df[mask], x="date", y=case_type
+        fig = px.scatter(df[mask]
+                         , x="date"
+                         , y=case_type
                          , color="location"
                          )
-
-    elif chart_type == "world":
-        fig = px.choropleth(df[mask], locations="iso_code", animation_frame="date_str"
-                            , hover_name="location"
-                            , color=case_type, color_continuous_scale=px.colors.sequential.Viridis
-                            , projection='kavrayskiy7'
-                            )
     else:
-        fig = px.line(df[mask], x="date", y=case_type
+        fig = px.line(df[mask]
+                      , x="date"
+                      , y=case_type
                       , color="location"
-                      , hover_name="location"
+                      , hover_data=[case_type]
                       )
-        fig.update_traces(connectgaps=True
-                          , mode="markers+lines"
-                          , hovertemplate=None)
-        fig.update_layout(hovermode="x unified")
+        fig.update_traces(connectgaps=True)
 
-    # Add chart axis label
+    # Add chart templates + layouts
+    fig.update_traces(hovertemplate=None)
     fig.update_layout(title=generate_title(countries, case_type)
                       , xaxis_title="Date"
                       , yaxis_title=get_casetype(case_type)
-                      )
+                      , hovermode="x")
 
     # - Chart Indicator -
-    if type(chart_indicator) == list and chart_type not in ['world']:
-
+    if type(chart_indicator) == list:
         if 'max' in chart_indicator:  # Max Line
             y = df[mask][case_type].max()
             fig.add_shape(
@@ -296,81 +347,6 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator, 
             )
 
     return fig
-
-
-@app.callback(
-    Output("insight-dashboard-1", "figure"),
-    Output("insight-dashboard-2", "figure"),
-    Output("insight-dashboard-3", "figure"),
-    Output("insight-dashboard-4", "figure"),
-    Output("insight-dashboard-5", "figure"),
-    Output("insight-dashboard-6", "figure"),
-    [
-        Input("dropdown-insight-timeaverage", "value")
-    ]
-)
-def update_insights(timeaverage):
-    fig1 = go.Figure(
-        go.Indicator(
-            mode="number+delta",
-            value=450,
-            title={
-                "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"},
-            # delta={'reference': 400, 'relative': True},
-            # domain={'x': [0.6, 1], 'y': [0, 1]}
-        ))
-
-    fig2 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=4500,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
-
-    fig3 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=45000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
-
-    fig4 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=450000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
-
-    fig5 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=450000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
-
-    fig6 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=450000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
-
-    return fig1, fig2, fig3, fig4, fig5, fig6
 
 
 def generate_title(countries, case_type):
