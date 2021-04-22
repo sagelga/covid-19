@@ -62,21 +62,6 @@ option_case_type = [
     , {'label': 'Vaccinated all doses per population', 'value': 'people_fully_vaccinated_per_population'}
 ]
 
-
-def generate_insight_cards(id, title, p):
-    return html.Div(children=[
-        html.Div(children=[
-            dcc.Graph(id="insight-dashboard{}".format(id))
-        ], className="four columns"),
-        html.Div(children=[
-            html.H5(title),
-            html.P(p,
-                   style={'align': 'justify'}
-                   ),
-        ], className="eight columns"),
-    ], className="six columns")
-
-
 # Website Builder
 layout = html.Div([
     html.Div(children=[
@@ -206,18 +191,6 @@ layout = html.Div([
         ], className='three columns'),
     ], className='row'),
 
-    html.Br(),
-
-    html.Div(children=[
-        html.H2('Insights'),
-        html.P(
-            'These are insights from your data selection. If you like to change the insight section, try adding/removing a country from the dropdown above.')
-    ]),
-
-    generate_insight_cards(1, 'Title', 'Subtitle'),
-    generate_insight_cards(2, 'Title', 'Subtitle'),
-    generate_insight_cards(3, 'Title', 'Subtitle'),
-    generate_insight_cards(4, 'Title', 'Subtitle'),
 ])
 
 
