@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import dash
-from dash.dependencies import Input, Output, State, ALL
+from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
@@ -61,10 +61,20 @@ option_case_type = [
     , {'label': 'Vaccinated all doses per population', 'value': 'people_fully_vaccinated_per_population'}
 ]
 
+
+def get_indicator(case_type):
+    return go.Figure(go.Indicator(
+        mode="number", value=400,
+        title={
+            "text": "Bad Request<br><span style='font-size:0.8em;color:gray'>Please select <b>at least one</b> country to continue</span>"},
+        domain={'y': [0, 1], 'x': [0.25, 0.75]}))
+
+
 # Website Builder
+
 layout = html.Div([
     html.Div(children=[
-        html.H2('Data'),
+        html.H2('Explore'),
         html.P('Select indicators from the dropdown menu.')
     ]),
     # Options
@@ -101,10 +111,7 @@ layout = html.Div([
         ], className="three columns"),
     ], className="row"),
 
-    # Chart
-    html.Div(children=[
-        dcc.Graph(id="result-chart")
-    ], className="twelve columns"),
+    html.Br(),
 
     html.Div(children=[
         html.Div(children=[
@@ -165,10 +172,9 @@ layout = html.Div([
                 , searchable=False
                 , persistence=True
                 , persistence_type='session'
-                # , persistence=True
-                # , persistence_type='memory'
             ),
         ], className='three columns'),
+
         html.Div(children=[
             html.Label('📊 Regression Line'),
             dcc.Dropdown(
@@ -178,86 +184,43 @@ layout = html.Div([
                     , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
                 ]
                 , placeholder="Select an option (optional)"
+                , disabled=True
                 , multi=True
                 , clearable=True
                 , searchable=False
                 , persistence=True
                 , persistence_type='session'
-                # , persistence=True
-                # , persistence_type='memory'
             ),
         ], className='three columns'),
     ], className='row'),
 
     html.Br(),
 
+    # Chart
     html.Div(children=[
-        html.H2('Predictions'),
-        html.P(
-            'DISCLAIMER : This is only a statistical predictions only. Predicted data may not reflects real-world scenario.')
-    ]),
+        dcc.Graph(id="home-result-chart")
+    ], className="twelve columns"),
 
-    html.Div([
-        html.Div([
-            html.Label(curr_time + ' Time Range'),
-            dcc.Dropdown(
-                id="home-dropdown-prediction-time",
-                options=[
-                    {'label': 'All time', 'value': 'all'}
-                    , {'label': '7 Days', 'value': '7'}
-                    , {'label': '14 Days', 'value': '14'}
-                    , {'label': '30 Days', 'value': '30'}
-                    , {'label': '90 Days', 'value': '90'}
-                    , {'label': '180 Days', 'value': '180'}
-                    , {'label': '365 Days', 'value': '365'}
-                ]
-                , placeholder="Select a range"
-                , value='14'
-                , multi=False
-                , clearable=False
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className="three columns"),
+    html.Br(),
 
-        html.Div([
-            html.Label('📊 Regression Line'),
-            dcc.Dropdown(
-                id="home-dropdown-prediction-method"
-                , options=[
-                    {'label': 'Linear Regression Trend Line', 'value': 'linear'}
-                    , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
-                ]
-                , placeholder="Select an option (optional)"
-                , multi=True
-                , clearable=True
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-                # , persistence=True
-                # , persistence_type='memory'
-            ),
-        ], className='three columns'),
-    ], className='row'),
+    html.H2('Statistics'),
 
-    dcc.Graph(),
+    html.Div(id='home-overall-card', children=[]),
 
 ])
 
 
 @app.callback(
-    Output("result-chart", "figure"),
+    Output("home-result-chart", "figure"),
     [
         Input("home-dropdown-country", "value")
         , Input("home-dropdown-casetype", "value")
         , Input("home-dropdown-charttype", "value")
         , Input("home-dropdown-timerange", "value")
         , Input("home-dropdown-chartindicator", "value")
-        , Input("home-dropdown-chartregressionline", "value")
     ]
 )
-def update_graph(countries, case_type, chart_type, time_range, chart_indicator, regression_line):
+def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
     # - Check a required column
     if not len(countries):
         return go.Figure(go.Indicator(
@@ -347,6 +310,93 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator, 
             )
 
     return fig
+
+
+@app.callback(
+    Output('home-overall-card', "children"),
+    [Input("home-dropdown-country", "value")]
+)
+def template_overall_card(country):
+    new_children = []
+    for country_name in country:
+        children = html.Div([
+
+            html.Div([
+                html.Div([
+                    html.H5(country_name),
+                ], className='nine columns'),
+
+                html.Div([
+                    dcc.Dropdown(
+                        id={"type": "home-dropdown-statistics-option", 'index': country_name}
+                        , options=[
+                            {'label': 'Yes', 'value': 'yes'}
+                            , {'label': 'No', 'value': 'no'}
+                        ]
+                        , placeholder="Select an option..."
+                        , multi=False
+                        , searchable=False
+                        , persistence=True
+                        , persistence_type='session'
+                    ),
+                ], className='three columns'),
+            ], className='row'),
+
+            html.Div([
+                html.Div([
+                    html.Label('New Case'),
+                    dcc.Graph(id={'type': 'new_cases', 'index': country_name}),
+
+                    html.Label('Total Case'),
+                    dcc.Graph(id={'type': 'total_cases', 'index': country_name}),
+
+                ], className='three columns'),
+                html.Div([
+                    html.Label('New Deaths'),
+                    dcc.Graph(id={'type': 'new_deaths', 'index': country_name}),
+
+                    html.Label('Total Deaths'),
+                    dcc.Graph(id={'type': 'total_deaths', 'index': country_name}),
+
+                ], className='three columns'),
+                html.Div([
+                    html.Label('New Dose Given'),
+                    dcc.Graph(id={'type': 'new_vaccinations', 'index': country_name}),
+                    html.Label('Total Dose Given'),
+                    dcc.Graph(id={'type': 'total_vaccinations', 'index': country_name}),
+
+                ], className='three columns'),
+                html.Div([
+                    html.Label('Total Vaccinated'),
+                    dcc.Graph(id={'type': 'people_fully_vaccinated', 'index': country_name}),
+
+                ], className='three columns'),
+            ], className='row'),
+        ])
+
+        new_children.append(children)
+
+    return new_children
+
+
+@app.callback(
+    Output({'type': 'new_cases', 'index': MATCH}, "figure"),
+    Output({'type': 'total_cases', 'index': MATCH}, "figure"),
+    Output({'type': 'new_deaths', 'index': MATCH}, "figure"),
+    Output({'type': 'total_deaths', 'index': MATCH}, "figure"),
+    Output({'type': 'new_vaccinations', 'index': MATCH}, "figure"),
+    Output({'type': 'total_vaccinations', 'index': MATCH}, "figure"),
+    Output({'type': 'people_fully_vaccinated', 'index': MATCH}, "figure"),
+    [Input({'type': 'home-dropdown-statistics-option', 'index': MATCH}, "value")]
+)
+def update_overall_card(stats_option):
+    error_graph = go.Figure(go.Indicator(
+        mode="number", value=500,
+        title={
+            "text": "Work in Progress<br><span style='font-size:0.8em;color:gray'>This graph is still working in progress</span>"},
+        domain={'y': [0, 1], 'x': [0.25, 0.75]}))
+
+    return error_graph, error_graph, error_graph, error_graph, error_graph, error_graph, error_graph
 
 
 def generate_title(countries, case_type):
