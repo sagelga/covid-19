@@ -330,8 +330,7 @@ def template_overall_card(country):
                     dcc.Dropdown(
                         id={"type": "home-dropdown-statistics-option", 'index': country_name}
                         , options=[
-                            {'label': 'Yes', 'value': 'yes'}
-                            , {'label': 'No', 'value': 'no'}
+                            {'label': 'by Population', 'value': 'population'}
                         ]
                         , placeholder="Select an option..."
                         , multi=False
@@ -381,22 +380,40 @@ def template_overall_card(country):
 
 @app.callback(
     Output({'type': 'new_cases', 'index': MATCH}, "figure"),
-    Output({'type': 'total_cases', 'index': MATCH}, "figure"),
     Output({'type': 'new_deaths', 'index': MATCH}, "figure"),
-    Output({'type': 'total_deaths', 'index': MATCH}, "figure"),
     Output({'type': 'new_vaccinations', 'index': MATCH}, "figure"),
+    Output({'type': 'total_cases', 'index': MATCH}, "figure"),
+    Output({'type': 'total_deaths', 'index': MATCH}, "figure"),
     Output({'type': 'total_vaccinations', 'index': MATCH}, "figure"),
     Output({'type': 'people_fully_vaccinated', 'index': MATCH}, "figure"),
     [Input({'type': 'home-dropdown-statistics-option', 'index': MATCH}, "value")]
 )
 def update_overall_card(stats_option):
-    error_graph = go.Figure(go.Indicator(
-        mode="number", value=500,
-        title={
-            "text": "Work in Progress<br><span style='font-size:0.8em;color:gray'>This graph is still working in progress</span>"},
-        domain={'y': [0, 1], 'x': [0.25, 0.75]}))
+    figure = []
+    figure_options = ['new_cases', 'new_deaths', 'new_vaccinations']
+    for x in figure_options:
+        new_figure = go.Figure(go.Indicator(
+            mode="number+delta", value=500,
+            delta={"reference": 512, "valueformat": ".0f"},
+            domain={'x': [0, 1], 'y': [0, 1]}))
 
-    return error_graph, error_graph, error_graph, error_graph, error_graph, error_graph, error_graph
+        new_figure.update_layout(autosize=False, height=200, margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
+                                 font={'size': 10})
+
+        figure.append(new_figure)
+
+    figure_options = ['total_cases', 'total_deaths', 'total_vaccinations', 'people_fully_vaccinated']
+    for x in figure_options:
+        new_figure = go.Figure(go.Indicator(
+            mode="number", value=500,
+            domain={'x': [0, 1], 'y': [0, 1]}))
+
+        new_figure.update_layout(autosize=False, height=200, margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
+                                 font={'size': 10})
+
+        figure.append(new_figure)
+
+    return figure[0], figure[1], figure[2], figure[3], figure[4], figure[5], figure[6]
 
 
 def generate_title(countries, case_type):
