@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import dash
-from dash.dependencies import Input, Output, State, ALL
+from dash.dependencies import Input, Output, State, ALL, MATCH
+from dash.exceptions import PreventUpdate
 import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
@@ -33,11 +34,11 @@ df = df.dropna(subset=[
 # Data Transform
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values(by=['date', 'location'])
-df['date_str'] = df['date'].apply(lambda x: str(x))
 
 # Calculate fields
 df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
+df['lethal_rate'] = 100 * (df['total_deaths'] / df['total_cases'])
 
 # all_country = sorted(df["location"].unique())
 all_country = np.sort(df["location"].unique())
@@ -51,6 +52,7 @@ option_case_type = [
     , {'label': 'New deaths attributed', 'value': 'new_deaths'}
     , {'label': 'Total confirmed cases', 'value': 'total_cases'}
     , {'label': 'Total deaths attributed', 'value': 'total_deaths'}
+    , {'label': 'Lethality Rate', 'value': 'lethal_rate'}
     , {'label': 'Vaccinated one dose', 'value': 'people_vaccinated'}
     , {'label': 'Vaccinated all doses', 'value': 'people_fully_vaccinated'}
     , {'label': 'Patient in Hospital', 'value': 'hosp_patients'}
@@ -62,25 +64,10 @@ option_case_type = [
     , {'label': 'Vaccinated all doses per population', 'value': 'people_fully_vaccinated_per_population'}
 ]
 
-
-def generate_insight_cards(id, title, p):
-    return html.Div(children=[
-        html.Div(children=[
-            dcc.Graph(id="insight-dashboard{}".format(id))
-        ], className="four columns"),
-        html.Div(children=[
-            html.H5(title),
-            html.P(p,
-                   style={'align': 'justify'}
-                   ),
-        ], className="eight columns"),
-    ], className="six columns")
-
-
 # Website Builder
 layout = html.Div([
     html.Div(children=[
-        html.H2('Data'),
+        html.H2('Explore'),
         html.P('Select indicators from the dropdown menu.')
     ]),
     # Options
@@ -88,10 +75,10 @@ layout = html.Div([
         html.Div(children=[
             html.Label('🌎 Countries'),
             dcc.Dropdown(
-                id="dropdown-country"
+                id="home-dropdown-country"
                 , options=[{"label": x, "value": x}
                            for x in all_country]
-                , placeholder="Select a city"
+                , placeholder="Select a country"
                 , value=['Thailand']
                 , multi=True
                 , clearable=True
@@ -104,9 +91,9 @@ layout = html.Div([
         html.Div(children=[
             html.Label('📂 Case Type'),
             dcc.Dropdown(
-                id="dropdown-casetype"
+                id="home-dropdown-casetype"
                 , options=option_case_type
-                , placeholder="Select a type"
+                , placeholder="Select a type of case"
                 , value='new_cases'
                 , multi=False
                 , clearable=False
@@ -117,22 +104,18 @@ layout = html.Div([
         ], className="three columns"),
     ], className="row"),
 
-    # Chart
-    html.Div(children=[
-        dcc.Graph(id="result-chart")
-    ], className="twelve columns"),
+    html.Br(),
 
     html.Div(children=[
         html.Div(children=[
             html.Label('📊 Chart Type'),
             dcc.Dropdown(
-                id="dropdown-typechart"
+                id="home-dropdown-charttype"
                 , options=[
                     {'label': '📈 Line Chart', 'value': 'line'}
-                    , {'label': '📊 Bar Chart', 'value': 'bar'}
                     , {'label': '📊 Scatter Plot', 'value': 'scatter'}
-                    , {'label': '📈 Area Chart', 'value': 'area'}
-                    , {'label': '🗺️ World Map', 'value': 'world'}
+                    , {'label': '📊 Stacked Bar Chart', 'value': 'bar'}
+                    , {'label': '📈 Stacked Area Chart', 'value': 'area'}
                 ]
                 , placeholder="Select a data source"
                 , value='line'
@@ -147,7 +130,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label(curr_time + ' Time Range'),
             dcc.Dropdown(
-                id="dropdown-timerange",
+                id="home-dropdown-timerange",
                 options=[
                     {'label': 'All time', 'value': 'all'}
                     , {'label': '7 Days', 'value': '7'}
@@ -170,7 +153,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label('📊 Chart Indicators'),
             dcc.Dropdown(
-                id="dropdown-chartoption"
+                id="home-dropdown-chartindicator"
                 , options=[
                     {'label': 'Highest Threshold', 'value': 'max'}
                     , {'label': 'Average Threshold', 'value': 'avg'}
@@ -182,150 +165,155 @@ layout = html.Div([
                 , searchable=False
                 , persistence=True
                 , persistence_type='session'
-                # , persistence=True
-                # , persistence_type='memory'
             ),
         ], className='three columns'),
+
         html.Div(children=[
             html.Label('📊 Regression Line'),
             dcc.Dropdown(
-                id="dropdown-regressionoption"
+                id="home-dropdown-chartregressionline"
                 , options=[
                     {'label': 'Linear Regression Trend Line', 'value': 'linear'}
                     , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
                 ]
                 , placeholder="Select an option (optional)"
+                , disabled=True
                 , multi=True
                 , clearable=True
                 , searchable=False
                 , persistence=True
                 , persistence_type='session'
-                # , persistence=True
-                # , persistence_type='memory'
             ),
         ], className='three columns'),
     ], className='row'),
 
     html.Br(),
 
+    # Chart
     html.Div(children=[
-        html.H2('Insights'),
-        html.P(
-            'These are insights from your data selection. If you like to change the insight section, try adding/removing a country from the dropdown above.')
+        dcc.Graph(id="home-result-chart")
+    ], className="twelve columns"),
+
+    html.Br(),
+
+    html.H2('Statistics'),
+
+    html.Div(children=[
+        html.Label('🌎 Countries'),
+        dcc.Dropdown(
+            id="home-dropdown-stats-country"
+            , options=[{"label": x, "value": x}
+                       for x in all_country]
+            , placeholder="Select a country"
+            , multi=True
+            , clearable=True
+            , searchable=True
+            , persistence=True
+            , persistence_type='session'
+        ),
     ]),
 
-    generate_insight_cards(1, 'Title', 'Subtitle'),
-    generate_insight_cards(2, 'Title', 'Subtitle'),
-    generate_insight_cards(3, 'Title', 'Subtitle'),
-    generate_insight_cards(4, 'Title', 'Subtitle'),
+    html.Br(),
+
+    html.Div(id='home-overall-card', children=[]),
+
 ])
 
 
 @app.callback(
-    Output("result-chart", "figure"),
+    Output("home-result-chart", "figure"),
     [
-        Input("dropdown-casetype", "value")
-        , Input("dropdown-country", "value")
-        , Input("dropdown-typechart", "value")
-        , Input("dropdown-chartoption", "value")
-        , Input("dropdown-timerange", "value")
+        Input("home-dropdown-country", "value")
+        , Input("home-dropdown-casetype", "value")
+        , Input("home-dropdown-charttype", "value")
+        , Input("home-dropdown-timerange", "value")
+        , Input("home-dropdown-chartindicator", "value")
     ]
 )
-def update_graph(case_type, countries, type_chart, chart_indicator, time_range):
-    if time_range != 'all':
-        # - Time Range -
-        time_max = datetime.today()
-        time_list = []
-        for _ in range(1, int(time_range) + 1):
-            time_check = time_max - timedelta(days=_)
-            # if time_check in df['date']:
-            time_check = time_check.strftime("%Y-%m-%d")
-            time_list.append(time_check)
+def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
+    # - Check a required column
+    if not len(countries):
+        return go.Figure(go.Indicator(
+            mode="number", value=400,
+            title={
+                "text": "Bad Request<br><span style='font-size:0.8em;color:gray'>Please select <b>at least one</b> country to continue</span>"},
+            domain={'y': [0, 1], 'x': [0.25, 0.75]}))
 
-        # - Apply mask -
+    # - Time Range -
+    time_list = []
+    if time_range != 'all':
+        for _ in range(1, int(time_range) + 1):
+            time_check = (datetime.today() - timedelta(days=_)).strftime("%Y-%m-%d")
+            time_list.append(time_check)
         mask = df['location'].isin(countries) & df['date'].isin(time_list)
     else:
         mask = df['location'].isin(countries)
+        time_list = df['date'].unique().tolist()
 
-    if type_chart == "area":  # Line Chart
+    # - Chart Type -
+    if chart_type == "area":  # Line Chart
         fig = px.area(df[mask]
                       , x="date"
                       , y=case_type
                       , color="location"
                       , hover_name="location"
+                      , hover_data=[case_type]
                       )
         fig.update_traces(connectgaps=True
                           , mode="markers+lines"
                           , hovertemplate=None)
         fig.update_layout(hovermode="x unified")
 
-    elif type_chart == "bar":  # Bar Chart
+    elif chart_type == "bar":  # Bar Chart
         fig = px.bar(df[mask]
                      , x="date"
                      , y=case_type
                      , color="location"
-                     , hover_name="location"
-                     , barmode="group"
+                     , hover_data=[case_type]
+                     , barmode="stack"
                      )
 
-    elif type_chart == "scatter":
+    elif chart_type == "scatter":
         fig = px.scatter(df[mask]
                          , x="date"
                          , y=case_type
                          , color="location"
-                         # , trendline="lowess"
                          )
-
-    elif type_chart == "world":
-        fig = px.choropleth(df[mask]
-                            , locations="iso_code"
-                            , color=case_type
-                            , hover_name="location"
-                            , animation_frame="date_str"
-                            , color_continuous_scale=px.colors.sequential.Viridis
-                            , projection='kavrayskiy7'
-                            )
     else:
         fig = px.line(df[mask]
                       , x="date"
                       , y=case_type
                       , color="location"
-                      , hover_name="location"
+                      , hover_data=[case_type]
                       )
-        fig.update_traces(connectgaps=True
-                          , mode="markers+lines"
-                          , hovertemplate=None)
-        fig.update_layout(hovermode="x unified")
+        fig.update_traces(connectgaps=True)
 
-    # Add chart axis label
+    # Add chart templates + layouts
+    fig.update_traces(hovertemplate=None)
     fig.update_layout(title=generate_title(countries, case_type)
                       , xaxis_title="Date"
                       , yaxis_title=get_casetype(case_type)
-                      )
+                      , hovermode="x")
 
-    if type(chart_indicator) == list and type_chart not in ['world']:
-        # Retrieve data
-        # df[mask]
-
-        # Max Line
-        if 'max' in chart_indicator:
-            y = 1200
+    # - Chart Indicator -
+    if type(chart_indicator) == list:
+        if 'max' in chart_indicator:  # Max Line
+            y = df[mask][case_type].max()
             fig.add_shape(
                 type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
                 x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
             )
 
-        # Average Line
-        if 'avg' in chart_indicator:
-            y = 900
+        if 'avg' in chart_indicator:  # Average Line
+            # y = (df[mask][case_type].sum()) / len(time_list)
+            y = (df[mask][case_type]).mean()
             fig.add_shape(
                 type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
                 x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
             )
 
-        # Min Line
-        if 'min' in chart_indicator:
-            y = 500
+        if 'min' in chart_indicator:  # Min Line
+            y = df[mask][case_type].min()
             fig.add_shape(
                 type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
                 x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
@@ -335,78 +323,150 @@ def update_graph(case_type, countries, type_chart, chart_indicator, time_range):
 
 
 @app.callback(
-    Output("insight-dashboard-1", "figure"),
-    Output("insight-dashboard-2", "figure"),
-    Output("insight-dashboard-3", "figure"),
-    Output("insight-dashboard-4", "figure"),
-    Output("insight-dashboard-5", "figure"),
-    Output("insight-dashboard-6", "figure"),
-    [
-        Input("dropdown-insight-timeaverage", "value")
-    ]
+    Output('home-overall-card', "children"),
+    [Input("home-dropdown-stats-country", "value")]
 )
-def update_insights(timeaverage):
-    fig1 = go.Figure(
-        go.Indicator(
-            mode="number+delta",
-            value=450,
-            title={
-                "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"},
-            # delta={'reference': 400, 'relative': True},
-            # domain={'x': [0.6, 1], 'y': [0, 1]}
-        ))
+def template_overall_card(country):
+    if not country:
+        raise PreventUpdate
 
-    fig2 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=4500,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
+    new_children = []
+    for country_name in country:
+        children = html.Div([
+            html.Div([
+                html.Div([
+                    html.Div([
+                        html.H5(country_name),
+                    ], className='nine columns'),
 
-    fig3 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=45000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
+                    html.Div([
+                        dcc.Dropdown(
+                            id={"type": "home-dropdown-statistics-option", 'index': country_name}
+                            , options=[
+                                {'label': 'by Population', 'value': 'population'}
+                            ]
+                            , placeholder="Select an option..."
+                            , multi=False
+                            , searchable=False
+                            , persistence=True
+                            , persistence_type='session'
+                        ),
+                    ], className='three columns'),
+                ], className='row'),
 
-    fig4 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=450000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
+                html.Div([
+                    html.Div([
+                        html.P('New Case'),
+                        html.Div(id={'type': 'label-new_cases', 'index': country_name}),
+                        dcc.Graph(id={'type': 'new_cases', 'index': country_name}),
 
-    fig5 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=450000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
+                        html.P('Total Case'),
+                        html.Div(id={'type': 'label-total_cases', 'index': country_name}),
+                        dcc.Graph(id={'type': 'total_cases', 'index': country_name}),
 
-    fig6 = go.Figure(go.Indicator(
-        mode="number+delta",
-        value=450000,
-        title={
-            "text": "Accounts<br><span style='font-size:0.8em;color:gray'>Subtitle</span><br><span style='font-size:0.8em;color:gray'>Subsubtitle</span>"
-        },
-        # delta={'reference': 400, 'relative': True},
-        # domain={'x': [0.6, 1], 'y': [0, 1]}
-    ))
+                    ], className='three columns'),
+                    html.Div([
+                        html.P('New Deaths'),
+                        html.Div(id={'type': 'label-new_deaths', 'index': country_name}),
+                        dcc.Graph(id={'type': 'new_deaths', 'index': country_name}),
 
-    return fig1, fig2, fig3, fig4, fig5, fig6
+                        html.P('Total Deaths'),
+                        html.Div(id={'type': 'label-total_deaths', 'index': country_name}),
+                        dcc.Graph(id={'type': 'total_deaths', 'index': country_name}),
+                    ], className='three columns'),
+                    html.Div([
+                        html.P('New Dose Administered'),
+                        html.Div(id={'type': 'label-new_vaccinations', 'index': country_name}),
+                        dcc.Graph(id={'type': 'new_vaccinations', 'index': country_name}),
+
+                        html.P('Total Dose Administered'),
+                        html.Div(id={'type': 'label-total_vaccinations', 'index': country_name}),
+                        dcc.Graph(id={'type': 'total_vaccinations', 'index': country_name}),
+                    ], className='three columns'),
+                    html.Div([
+                        html.P('New People Vaccinated'),
+                        html.Div(id={'type': 'label-people_vaccinated', 'index': country_name}),
+                        dcc.Graph(id={'type': 'people_vaccinated', 'index': country_name}),
+
+                        html.P('Total People Vaccinated'),
+                        html.Div(id={'type': 'label-people_fully_vaccinated', 'index': country_name}),
+                        dcc.Graph(id={'type': 'people_fully_vaccinated', 'index': country_name}),
+                    ], className='three columns'),
+                ], className='row'),
+
+            ], style={'border-radius': '10px', 'border': '2px solid #3d4e76', 'padding': '20px'}),
+            html.Br(),
+        ])
+
+        new_children.append(children)
+
+    return new_children
+
+
+@app.callback(
+    Output({'index': MATCH, 'type': 'label-new_cases'}, "children"),
+    Output({'index': MATCH, 'type': 'new_cases'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-new_deaths'}, "children"),
+    Output({'index': MATCH, 'type': 'new_deaths'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-new_vaccinations'}, "children"),
+    Output({'index': MATCH, 'type': 'new_vaccinations'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-total_cases'}, "children"),
+    Output({'index': MATCH, 'type': 'total_cases'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-total_deaths'}, "children"),
+    Output({'index': MATCH, 'type': 'total_deaths'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-total_vaccinations'}, "children"),
+    Output({'index': MATCH, 'type': 'total_vaccinations'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-people_vaccinated'}, "children"),
+    Output({'index': MATCH, 'type': 'people_vaccinated'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-people_fully_vaccinated'}, "children"),
+    Output({'index': MATCH, 'type': 'people_fully_vaccinated'}, "figure"),
+    [Input({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "value")
+        , State({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "id")]
+)
+def update_overall_card(stats_option, id):
+    # Compute the values by pulling data from DF
+    def get_value(type):
+        ddf = df[['date', 'location', x]]
+        ddf = ddf.dropna(subset=[x])
+        ddf = ddf.loc[ddf['location'] == id['index']]
+        ddf = ddf.loc[ddf['date'] == ddf['date'].max()]
+        try:
+            value = ddf.iloc[0][x]
+        except IndexError:
+            value = np.nan
+        try:
+            time = "(on {})".format(ddf.iloc[0]['date'].strftime('%d %b %Y'))
+        except IndexError:
+            time = 'N/A'
+
+        return {'time': time, 'value': value}
+
+    def update_layout(layout):
+        return layout.update_layout(autosize=False, height=200, margin={'l': 20, 'r': 20, 't': 20, 'b': 20},
+                                    font={'size': 12})
+
+    figure = []
+
+    figure_options = ['new_cases', 'new_deaths', 'new_vaccinations', 'total_cases', 'total_deaths',
+                      'total_vaccinations', 'people_vaccinated',
+                      'people_fully_vaccinated']
+    for x in figure_options:
+        query = get_value(x)
+
+        new_label = html.Label('{}'.format(query['time']))
+
+        new_figure = go.Figure(go.Indicator(
+            mode="number", value=query['value'],
+            delta={"reference": 512, "valueformat": ".0f"},
+            domain={'x': [0, 1], 'y': [0, 1]}))
+
+        new_figure = update_layout(new_figure)
+
+        figure.append(new_label)
+        figure.append(new_figure)
+
+    return figure[0], figure[1], figure[2], figure[3], figure[4], figure[5], figure[6], figure[7], figure[8], \
+           figure[9], figure[10], figure[11], figure[12], figure[13], figure[14], figure[15]
 
 
 def generate_title(countries, case_type):
