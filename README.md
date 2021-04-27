@@ -4,6 +4,7 @@ COVID-19 Data Explorer is a dashboard-data explorer for COVID-19 data around the
 - Health Data pulled from [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
 - Vaccine Purchase &  Manufacturing Arrangements data pulled from [https://www.knowledgeportalia.org/covid19-vaccine-arrangements](https://www.knowledgeportalia.org/covid19-vaccine-arrangements)
     - Data is pulled, convert and stored in `.csv`
+- Mobility Trends Reports from [https://covid19.apple.com/mobility](https://covid19.apple.com/mobility)        
 
 ## Project Roadmaps
 We stored roadmaps here : [https://github.com/sagelga/covid-vaccine/projects](https://github.com/sagelga/covid-vaccine/projects)
