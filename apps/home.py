@@ -37,6 +37,7 @@ df = df.sort_values(by=['date', 'location'])
 # Calculate fields
 df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
+df['lethal_rate'] = 100 * (df['total_deaths'] / df['total_cases'])
 
 # all_country = sorted(df["location"].unique())
 all_country = np.sort(df["location"].unique())
@@ -50,6 +51,7 @@ option_case_type = [
     , {'label': 'New deaths attributed', 'value': 'new_deaths'}
     , {'label': 'Total confirmed cases', 'value': 'total_cases'}
     , {'label': 'Total deaths attributed', 'value': 'total_deaths'}
+    , {'label': 'Lethality Rate', 'value': 'lethal_rate'}
     , {'label': 'Vaccinated one dose', 'value': 'people_vaccinated'}
     , {'label': 'Vaccinated all doses', 'value': 'people_fully_vaccinated'}
     , {'label': 'Patient in Hospital', 'value': 'hosp_patients'}
@@ -61,17 +63,7 @@ option_case_type = [
     , {'label': 'Vaccinated all doses per population', 'value': 'people_fully_vaccinated_per_population'}
 ]
 
-
-def get_indicator(case_type):
-    return go.Figure(go.Indicator(
-        mode="number", value=400,
-        title={
-            "text": "Bad Request<br><span style='font-size:0.8em;color:gray'>Please select <b>at least one</b> country to continue</span>"},
-        domain={'y': [0, 1], 'x': [0.25, 0.75]}))
-
-
 # Website Builder
-
 layout = html.Div([
     html.Div(children=[
         html.H2('Explore'),
@@ -379,33 +371,45 @@ def template_overall_card(country):
 
 
 @app.callback(
-    Output({'type': 'new_cases', 'index': MATCH}, "figure"),
-    Output({'type': 'new_deaths', 'index': MATCH}, "figure"),
-    Output({'type': 'new_vaccinations', 'index': MATCH}, "figure"),
-    Output({'type': 'total_cases', 'index': MATCH}, "figure"),
-    Output({'type': 'total_deaths', 'index': MATCH}, "figure"),
-    Output({'type': 'total_vaccinations', 'index': MATCH}, "figure"),
-    Output({'type': 'people_fully_vaccinated', 'index': MATCH}, "figure"),
-    [Input({'type': 'home-dropdown-statistics-option', 'index': MATCH}, "value")]
+    Output({'index': MATCH, 'type': 'new_cases'}, "figure"),
+    Output({'index': MATCH, 'type': 'new_deaths'}, "figure"),
+    Output({'index': MATCH, 'type': 'new_vaccinations'}, "figure"),
+    Output({'index': MATCH, 'type': 'total_cases'}, "figure"),
+    Output({'index': MATCH, 'type': 'total_deaths'}, "figure"),
+    Output({'index': MATCH, 'type': 'total_vaccinations'}, "figure"),
+    Output({'index': MATCH, 'type': 'people_fully_vaccinated'}, "figure"),
+    [Input({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "value")
+        , Input({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "id")]
 )
-def update_overall_card(stats_option):
+def update_overall_card(stats_option, id):
     figure = []
+    # Compute the values by pulling data from DF
+    ddf = df[df['location'].isin([id['index']])
+             & df['date'].isin([df['date'].max()])
+             ]
+
     figure_options = ['new_cases', 'new_deaths', 'new_vaccinations']
     for x in figure_options:
+        # Retrieve data from pulled data
+        value = ddf.iloc[0][x]
+
         new_figure = go.Figure(go.Indicator(
-            mode="number+delta", value=500,
+            mode="number+delta", value=value,
             delta={"reference": 512, "valueformat": ".0f"},
             domain={'x': [0, 1], 'y': [0, 1]}))
 
-        new_figure.update_layout(autosize=False, height=200, margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
+        new_figure.update_layout(margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
                                  font={'size': 10})
 
         figure.append(new_figure)
 
     figure_options = ['total_cases', 'total_deaths', 'total_vaccinations', 'people_fully_vaccinated']
     for x in figure_options:
+        # Retrieve data from pulled data
+        value = ddf.iloc[0][x]
+
         new_figure = go.Figure(go.Indicator(
-            mode="number", value=500,
+            mode="number", value=value,
             domain={'x': [0, 1], 'y': [0, 1]}))
 
         new_figure.update_layout(autosize=False, height=200, margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
