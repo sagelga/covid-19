@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import dash
 from dash.dependencies import Input, Output, State, ALL, MATCH
+from dash.exceptions import PreventUpdate
 import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
@@ -204,14 +205,15 @@ layout = html.Div([
             , options=[{"label": x, "value": x}
                        for x in all_country]
             , placeholder="Select a country"
-            , value=['Thailand']
             , multi=True
             , clearable=True
             , searchable=True
             , persistence=True
             , persistence_type='session'
         ),
-    ], className="nine columns"),
+    ]),
+
+    html.Br(),
 
     html.Div(id='home-overall-card', children=[]),
 
@@ -325,6 +327,9 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
     [Input("home-dropdown-stats-country", "value")]
 )
 def template_overall_card(country):
+    if not country:
+        raise PreventUpdate
+
     new_children = []
     for country_name in country:
         children = html.Div([
@@ -389,9 +394,8 @@ def template_overall_card(country):
                     ], className='three columns'),
                 ], className='row'),
 
-                html.Br(),
-
-            ], style={'border-radius': '10px', 'border': '2px solid #3d4e76', 'padding': '20px'})
+            ], style={'border-radius': '10px', 'border': '2px solid #3d4e76', 'padding': '20px'}),
+            html.Br(),
         ])
 
         new_children.append(children)
@@ -426,9 +430,16 @@ def update_overall_card(stats_option, id):
         ddf = ddf.dropna(subset=[x])
         ddf = ddf.loc[ddf['location'] == id['index']]
         ddf = ddf.loc[ddf['date'] == ddf['date'].max()]
-        value = ddf.iloc[0][x]
-        time = ddf.iloc[0]['date'].strftime('%d %b %Y')
-        return [time, value]
+        try:
+            value = ddf.iloc[0][x]
+        except IndexError:
+            value = np.nan
+        try:
+            time = "(on {})".format(ddf.iloc[0]['date'].strftime('%d %b %Y'))
+        except IndexError:
+            time = 'N/A'
+
+        return {'time': time, 'value': value}
 
     def update_layout(layout):
         return layout.update_layout(autosize=False, height=200, margin={'l': 20, 'r': 20, 't': 20, 'b': 20},
@@ -442,10 +453,10 @@ def update_overall_card(stats_option, id):
     for x in figure_options:
         query = get_value(x)
 
-        new_label = html.Label('(on {})'.format(query[0]))
+        new_label = html.Label('{}'.format(query['time']))
 
         new_figure = go.Figure(go.Indicator(
-            mode="number", value=query[1],
+            mode="number", value=query['value'],
             delta={"reference": 512, "valueformat": ".0f"},
             domain={'x': [0, 1], 'y': [0, 1]}))
 
