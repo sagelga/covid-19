@@ -9,6 +9,7 @@ from app import server
 from apps import home
 from apps import world
 from apps import candidate
+from apps import mobility
 
 # Website Builder
 app.layout = html.Div([
@@ -21,6 +22,8 @@ app.layout = html.Div([
                 dcc.Location(id='url', refresh=False),
                 html.Div([
                     dcc.Link('Home', href='/'),
+                    dcc.Link(' ● ', href=''),
+                    dcc.Link('Mobility Report', href='/mobility'),
                     dcc.Link(' ● ', href=''),
                     dcc.Link('World Trends', href='/world'),
                     dcc.Link(' ● ', href=''),
@@ -71,6 +74,8 @@ def display_page(pathname):
         return world.layout
     if pathname == '/candidate':
         return candidate.layout
+    if pathname == '/mobility':
+        return mobility.layout
 
     # If URL does not match any page, returns to home layout
     return home.layout
