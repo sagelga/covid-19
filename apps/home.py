@@ -197,6 +197,22 @@ layout = html.Div([
 
     html.H2('Statistics'),
 
+    html.Div(children=[
+        html.Label('🌎 Countries'),
+        dcc.Dropdown(
+            id="home-dropdown-stats-country"
+            , options=[{"label": x, "value": x}
+                       for x in all_country]
+            , placeholder="Select a country"
+            , value=['Thailand']
+            , multi=True
+            , clearable=True
+            , searchable=True
+            , persistence=True
+            , persistence_type='session'
+        ),
+    ], className="nine columns"),
+
     html.Div(id='home-overall-card', children=[]),
 
 ])
@@ -306,63 +322,76 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
 
 @app.callback(
     Output('home-overall-card', "children"),
-    [Input("home-dropdown-country", "value")]
+    [Input("home-dropdown-stats-country", "value")]
 )
 def template_overall_card(country):
     new_children = []
     for country_name in country:
         children = html.Div([
-
             html.Div([
                 html.Div([
-                    html.H5(country_name),
-                ], className='nine columns'),
+                    html.Div([
+                        html.H5(country_name),
+                    ], className='nine columns'),
+
+                    html.Div([
+                        dcc.Dropdown(
+                            id={"type": "home-dropdown-statistics-option", 'index': country_name}
+                            , options=[
+                                {'label': 'by Population', 'value': 'population'}
+                            ]
+                            , placeholder="Select an option..."
+                            , multi=False
+                            , searchable=False
+                            , persistence=True
+                            , persistence_type='session'
+                        ),
+                    ], className='three columns'),
+                ], className='row'),
 
                 html.Div([
-                    dcc.Dropdown(
-                        id={"type": "home-dropdown-statistics-option", 'index': country_name}
-                        , options=[
-                            {'label': 'by Population', 'value': 'population'}
-                        ]
-                        , placeholder="Select an option..."
-                        , multi=False
-                        , searchable=False
-                        , persistence=True
-                        , persistence_type='session'
-                    ),
-                ], className='three columns'),
-            ], className='row'),
+                    html.Div([
+                        html.P('New Case'),
+                        html.Div(id={'type': 'label-new_cases', 'index': country_name}),
+                        dcc.Graph(id={'type': 'new_cases', 'index': country_name}),
 
-            html.Div([
-                html.Div([
-                    html.Label('New Case'),
-                    dcc.Graph(id={'type': 'new_cases', 'index': country_name}),
+                        html.P('Total Case'),
+                        html.Div(id={'type': 'label-total_cases', 'index': country_name}),
+                        dcc.Graph(id={'type': 'total_cases', 'index': country_name}),
 
-                    html.Label('Total Case'),
-                    dcc.Graph(id={'type': 'total_cases', 'index': country_name}),
+                    ], className='three columns'),
+                    html.Div([
+                        html.P('New Deaths'),
+                        html.Div(id={'type': 'label-new_deaths', 'index': country_name}),
+                        dcc.Graph(id={'type': 'new_deaths', 'index': country_name}),
 
-                ], className='three columns'),
-                html.Div([
-                    html.Label('New Deaths'),
-                    dcc.Graph(id={'type': 'new_deaths', 'index': country_name}),
+                        html.P('Total Deaths'),
+                        html.Div(id={'type': 'label-total_deaths', 'index': country_name}),
+                        dcc.Graph(id={'type': 'total_deaths', 'index': country_name}),
+                    ], className='three columns'),
+                    html.Div([
+                        html.P('New Dose Administered'),
+                        html.Div(id={'type': 'label-new_vaccinations', 'index': country_name}),
+                        dcc.Graph(id={'type': 'new_vaccinations', 'index': country_name}),
 
-                    html.Label('Total Deaths'),
-                    dcc.Graph(id={'type': 'total_deaths', 'index': country_name}),
+                        html.P('Total Dose Administered'),
+                        html.Div(id={'type': 'label-total_vaccinations', 'index': country_name}),
+                        dcc.Graph(id={'type': 'total_vaccinations', 'index': country_name}),
+                    ], className='three columns'),
+                    html.Div([
+                        html.P('New People Vaccinated'),
+                        html.Div(id={'type': 'label-people_vaccinated', 'index': country_name}),
+                        dcc.Graph(id={'type': 'people_vaccinated', 'index': country_name}),
 
-                ], className='three columns'),
-                html.Div([
-                    html.Label('New Dose Given'),
-                    dcc.Graph(id={'type': 'new_vaccinations', 'index': country_name}),
-                    html.Label('Total Dose Given'),
-                    dcc.Graph(id={'type': 'total_vaccinations', 'index': country_name}),
+                        html.P('Total People Vaccinated'),
+                        html.Div(id={'type': 'label-people_fully_vaccinated', 'index': country_name}),
+                        dcc.Graph(id={'type': 'people_fully_vaccinated', 'index': country_name}),
+                    ], className='three columns'),
+                ], className='row'),
 
-                ], className='three columns'),
-                html.Div([
-                    html.Label('Total Vaccinated'),
-                    dcc.Graph(id={'type': 'people_fully_vaccinated', 'index': country_name}),
+                html.Br(),
 
-                ], className='three columns'),
-            ], className='row'),
+            ], style={'border-radius': '10px', 'border': '2px solid #3d4e76', 'padding': '20px'})
         ])
 
         new_children.append(children)
@@ -371,53 +400,62 @@ def template_overall_card(country):
 
 
 @app.callback(
+    Output({'index': MATCH, 'type': 'label-new_cases'}, "children"),
     Output({'index': MATCH, 'type': 'new_cases'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-new_deaths'}, "children"),
     Output({'index': MATCH, 'type': 'new_deaths'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-new_vaccinations'}, "children"),
     Output({'index': MATCH, 'type': 'new_vaccinations'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-total_cases'}, "children"),
     Output({'index': MATCH, 'type': 'total_cases'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-total_deaths'}, "children"),
     Output({'index': MATCH, 'type': 'total_deaths'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-total_vaccinations'}, "children"),
     Output({'index': MATCH, 'type': 'total_vaccinations'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-people_vaccinated'}, "children"),
+    Output({'index': MATCH, 'type': 'people_vaccinated'}, "figure"),
+    Output({'index': MATCH, 'type': 'label-people_fully_vaccinated'}, "children"),
     Output({'index': MATCH, 'type': 'people_fully_vaccinated'}, "figure"),
     [Input({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "value")
-        , Input({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "id")]
+        , State({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "id")]
 )
 def update_overall_card(stats_option, id):
-    figure = []
     # Compute the values by pulling data from DF
-    ddf = df[df['location'].isin([id['index']])
-             & df['date'].isin([df['date'].max()])
-             ]
-
-    figure_options = ['new_cases', 'new_deaths', 'new_vaccinations']
-    for x in figure_options:
-        # Retrieve data from pulled data
+    def get_value(type):
+        ddf = df[['date', 'location', x]]
+        ddf = ddf.dropna(subset=[x])
+        ddf = ddf.loc[ddf['location'] == id['index']]
+        ddf = ddf.loc[ddf['date'] == ddf['date'].max()]
         value = ddf.iloc[0][x]
+        time = ddf.iloc[0]['date'].strftime('%d %b %Y')
+        return [time, value]
+
+    def update_layout(layout):
+        return layout.update_layout(autosize=False, height=200, margin={'l': 20, 'r': 20, 't': 20, 'b': 20},
+                                    font={'size': 12})
+
+    figure = []
+
+    figure_options = ['new_cases', 'new_deaths', 'new_vaccinations', 'total_cases', 'total_deaths',
+                      'total_vaccinations', 'people_vaccinated',
+                      'people_fully_vaccinated']
+    for x in figure_options:
+        query = get_value(x)
+
+        new_label = html.Label('(on {})'.format(query[0]))
 
         new_figure = go.Figure(go.Indicator(
-            mode="number+delta", value=value,
+            mode="number", value=query[1],
             delta={"reference": 512, "valueformat": ".0f"},
             domain={'x': [0, 1], 'y': [0, 1]}))
 
-        new_figure.update_layout(margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
-                                 font={'size': 10})
+        new_figure = update_layout(new_figure)
 
+        figure.append(new_label)
         figure.append(new_figure)
 
-    figure_options = ['total_cases', 'total_deaths', 'total_vaccinations', 'people_fully_vaccinated']
-    for x in figure_options:
-        # Retrieve data from pulled data
-        value = ddf.iloc[0][x]
-
-        new_figure = go.Figure(go.Indicator(
-            mode="number", value=value,
-            domain={'x': [0, 1], 'y': [0, 1]}))
-
-        new_figure.update_layout(autosize=False, height=200, margin={'l': 40, 'r': 40, 't': 40, 'b': 40},
-                                 font={'size': 10})
-
-        figure.append(new_figure)
-
-    return figure[0], figure[1], figure[2], figure[3], figure[4], figure[5], figure[6]
+    return figure[0], figure[1], figure[2], figure[3], figure[4], figure[5], figure[6], figure[7], figure[8], \
+           figure[9], figure[10], figure[11], figure[12], figure[13], figure[14], figure[15]
 
 
 def generate_title(countries, case_type):
