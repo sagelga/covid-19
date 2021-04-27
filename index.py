@@ -7,6 +7,7 @@ from app import server
 
 # Connect to your app pages
 from apps import home
+from apps import world
 from apps import candidate
 
 # Website Builder
@@ -20,6 +21,8 @@ app.layout = html.Div([
                 dcc.Location(id='url', refresh=False),
                 html.Div([
                     dcc.Link('Home', href='/'),
+                    dcc.Link(' ● ', href=''),
+                    dcc.Link('World Trends', href='/world'),
                     dcc.Link(' ● ', href=''),
                     dcc.Link('Vaccine Candidate', href='/candidate'),
                 ], className="row"),
@@ -64,6 +67,8 @@ app.layout = html.Div([
               [Input('url', 'pathname')]
               )
 def display_page(pathname):
+    if pathname == '/world':
+        return world.layout
     if pathname == '/candidate':
         return candidate.layout
 
