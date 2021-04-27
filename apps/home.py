@@ -231,6 +231,12 @@ layout = html.Div([
     ]
 )
 def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
+    def draw_indicator(line_color, value):
+        return fig.add_shape(
+            type="line", line_color=line_color, line_width=3, opacity=1, line_dash="dot",
+            x0=0, x1=1, xref="paper", y0=value, y1=value, yref="y"
+        )
+
     # - Check a required column
     if not len(countries):
         return go.Figure(go.Indicator(
@@ -295,29 +301,18 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
                       , yaxis_title=get_casetype(case_type)
                       , hovermode="x")
 
-    # - Chart Indicator -
+    if type(chart_indicator) != list: return fig
+
+    # - Add Chart Indicator -
     if type(chart_indicator) == list:
         if 'max' in chart_indicator:  # Max Line
-            y = df[mask][case_type].max()
-            fig.add_shape(
-                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
-            )
+            draw_indicator("salmon", df[mask][case_type].max())
 
         if 'avg' in chart_indicator:  # Average Line
-            # y = (df[mask][case_type].sum()) / len(time_list)
-            y = (df[mask][case_type]).mean()
-            fig.add_shape(
-                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
-            )
+            draw_indicator("salmon", df[mask][case_type].mean())
 
         if 'min' in chart_indicator:  # Min Line
-            y = df[mask][case_type].min()
-            fig.add_shape(
-                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
-            )
+            draw_indicator("salmon", df[mask][case_type].min())
 
     return fig
 

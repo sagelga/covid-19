@@ -139,11 +139,13 @@ def sth(time_range):
     # - Apply mask -
     mask = df['date'].isin(time_list)
 
-    return px.choropleth(df[mask]
-                         , locations="iso_code"
-                         , color='case_per_population'
-                         , hover_name="location"
-                         , animation_frame="date_str"
-                         , color_continuous_scale=px.colors.sequential.Viridis
-                         , projection='kavrayskiy7'
-                         )
+    fig = px.choropleth(df[mask]
+                        , locations="iso_code"
+                        , color='case_per_population'
+                        , hover_name="location"
+                        , animation_frame="date_str"
+                        , color_continuous_scale=px.colors.sequential.Viridis
+                        , projection='miller'
+                        )
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig
