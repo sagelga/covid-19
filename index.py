@@ -10,6 +10,7 @@ from app import server
 from apps import home
 from apps import world
 from apps import candidate
+from apps import mobility
 
 # Website Builder
 location = dcc.Location(id='url', refresh=False)
@@ -18,6 +19,7 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/")),
         dbc.NavItem(dbc.NavLink("World Trends", href="/world")),
+        dbc.NavItem(dbc.NavLink("Mobility Reports", href="/mobility")),
         dbc.NavItem(dbc.NavLink("Vaccine Candidate", href="/candidate")),
     ],
     brand="COVID-19 Data Explorer",
@@ -75,6 +77,8 @@ def display_page(pathname):
         return world.layout
     if pathname == '/candidate':
         return candidate.layout
+    if pathname == '/mobility':
+        return mobility.layout
 
     # If URL does not match any page, returns to home layout
     return home.layout
