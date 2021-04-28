@@ -1,11 +1,17 @@
 # COVID-19 Data Explorer
 COVID-19 Data Explorer is a dashboard-data explorer for COVID-19 data around the world; running on Python using Plotly/Dash framework.
 
-- Health Data pulled from Our World in Data [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
-- Vaccine Purchase &  Manufacturing Arrangements data pulled from Graduate Institute [https://www.knowledgeportalia.org/covid19-vaccine-arrangements](https://www.knowledgeportalia.org/covid19-vaccine-arrangements)
-    - Data is pulled, convert and stored in `.csv`
-- Apple Mobility Trends Reports from [https://covid19.apple.com/mobility](https://covid19.apple.com/mobility)        
-- Google Community Mobility Trends Reports from [https://www.google.com/covid19/mobility/](https://www.google.com/covid19/mobility/)        
+- Health Data 
+  - Pulled from Our World in Data [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
+- Vaccine Purchase &  Manufacturing Arrangements data 
+  - Pulled from Graduate Institute [https://www.knowledgeportalia.org/covid19-vaccine-arrangements](https://www.knowledgeportalia.org/covid19-vaccine-arrangements)
+    - Data is manually pulled and converted to `.csv`.
+- Mobility Trends
+  - Apple Mobility Trends Reports from [https://covid19.apple.com/mobility](https://covid19.apple.com/mobility)
+  - Google Community Mobility Trends Reports from [https://www.google.com/covid19/mobility/](https://www.google.com/covid19/mobility/)
+  - Waze COVID-19 Impact Reports [https://www.waze.com/covid19](https://www.waze.com/covid19)
+  - Tom Tom Traffic Index Reports [https://www.tomtom.com/en_gb/traffic-index/](https://www.tomtom.com/en_gb/traffic-index/)
+    - Pulled from Processed data source : [https://github.com/ActiveConclusion/COVID19_mobility](https://github.com/ActiveConclusion/COVID19_mobility)
 
 ## Deployment
 Repository development deliverables will be automatically deployed to Heroku after merge/push commit.
