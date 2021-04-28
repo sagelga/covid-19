@@ -1,6 +1,7 @@
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 
 from app import app
 from app import server
@@ -11,42 +12,39 @@ from apps import world
 from apps import candidate
 
 # Website Builder
-app.layout = html.Div([
-    html.Div([
-        html.Div([], className="one columns"),
-        html.Div([
-            html.H1('COVID-19 Data Explorer'),
+location = dcc.Location(id='url', refresh=False)
 
-            html.Nav([
-                dcc.Location(id='url', refresh=False),
-                html.Div([
-                    dcc.Link('Home', href='/'),
-                    dcc.Link(' ● ', href=''),
-                    dcc.Link('World Trends', href='/world'),
-                    dcc.Link(' ● ', href=''),
-                    dcc.Link('Vaccine Candidate', href='/candidate'),
-                ], className="row"),
-            ]),
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Home", href="/")),
+        dbc.NavItem(dbc.NavLink("World Trends", href="/world")),
+        dbc.NavItem(dbc.NavLink("Vaccine Candidate", href="/candidate")),
+    ],
+    brand="COVID-19 Data Explorer",
+    color="dark",
+    dark=True,
+)
 
-            html.Br(),
+# padding for the page content
+CONTENT_STYLE = {
+    # "margin-left": "2rem",
+    # "margin-right": "2rem",
+    "padding": "2rem 2rem",
+}
 
-            html.Div([
-                html.Div(id='page-content', children=[])
-            ]),
+content = html.Div([
+    html.Div(children=[], className='one column'),
+    html.Div(id='page-content', children=[], style=CONTENT_STYLE, className='ten columns'),
+    html.Div(children=[], className='one column'),
+], className='row')
 
-        ], className="ten columns"),
-
-        html.Div([], className="one columns"),
-
-    ], className="row"),
-
-    # Footer Area
-    html.Br(),
-    html.Div(children=[
+footer = html.Div(
+    [
         html.P(['Source : '
                    , html.A("Our World in Data", href="https://ourworldindata.org/")
                    , ", ",
                 html.A("Graduate Institute", href="https://www.knowledgeportalia.org/covid19-vaccine-arrangements")]),
+
         html.P(['This Data Explorer is '
                    , html.A("Open Source", href="https://github.com/sagelga/covid-vaccine")
                    , '. Buy us a ☕ by '
@@ -58,9 +56,15 @@ app.layout = html.Div([
                 ]),
 
         html.P(['Created with ❤️ by ', html.A("@sagelga", href="https://github.com/sagelga/covid-vaccine")]),
-    ], className="footer", style={'background-color': '#e5ecf6', 'text-align': 'center'}),
+    ]
+    , className="footer", style={'background-color': '#e5ecf6', 'text-align': 'center'}
+)
 
-])
+app.layout = html.Div([
+    navbar,
+    content,
+    footer,
+    location])
 
 
 @app.callback(Output('page-content', 'children'),
