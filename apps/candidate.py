@@ -39,7 +39,6 @@ vp_df = pd.read_csv(url)
 # url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-secondary.csv'
 # l2_df = pd.read_csv(url)
 
-
 def generate_dropdown_option(label, id, options, value, placeholder='Select the option ...', multi=False):
     layout = html.Div([
         html.Label(label),
@@ -55,42 +54,6 @@ def generate_dropdown_option(label, id, options, value, placeholder='Select the 
     ])
 
     return layout
-
-
-def generate_candidateinfo_card():
-    vaccine_candidate = vp_df['Vaccine candidate'].tolist()
-    location = vp_df['Developer Location'].tolist()
-    phase = vp_df['Trial Phase'].tolist()
-    doses = vp_df['Doses'].tolist()
-
-    layout = []
-    for x in range(len(vaccine_candidate)):
-        graphid = "candidate-graph-candidateinfo-{}".format(x)
-
-        layout.append(html.Div([dcc.Graph(id=graphid)], className="six columns"))
-        layout.append(html.Div([
-            html.H5(vaccine_candidate[x])
-            , html.Li("Developer Location : {}".format(location[x]))
-            , html.Li("Development Phase : {}".format(phase[x]))
-            , html.Li("Dose(s) required : {}".format(doses[x]))
-        ], className="six columns"))
-
-    layout2 = []
-    loop_count = len(layout) // 2
-    for x in range(loop_count):
-        pointer = x * 2
-        layout2.append(html.Div(children=[layout[pointer], layout[pointer + 1]], className='six columns'))
-
-    layout3 = []
-    loop_count = len(layout2) // 2
-    for x in range(loop_count):
-        pointer = x * 2
-        layout3.append(html.Div(children=[layout2[pointer], layout2[pointer + 1]], className='row'))
-
-    if len(layout2) % 2:
-        layout3.append(html.Div(children=[layout2[-1]], className='row'))
-
-    return html.Div(layout3)
 
 
 # Website Builder
@@ -165,7 +128,7 @@ layout = html.Div([
         html.Div(children=[
             html.Div(children=[
                 html.H4('Showing x of x available candidates'
-                        # , id=''
+                        , id='candidate-heading-candidateinfo-candidatecount'
                         )
             ], className='eight columns'),
 
@@ -188,12 +151,9 @@ layout = html.Div([
         ], className='row'),
 
         html.Br(),
-
-        html.Div(children=[
-            generate_candidateinfo_card()
-        ]),
+        # generate_candidateinfo_card()
+        html.Div(id='candidate-components-candidateinfo'),
     ]),  # Vaccine Info Card
-
 ])
 
 
@@ -224,13 +184,49 @@ def candidate_graph_vaccinecount(buyer):
 def candidate_graph_vaccineprice(order_category, order):
     fig = px.box(df, x='Vaccine candidate', y='Price/Dose (in USD)')
     return fig
-# @app.callback(
-#     Output("candidate-heading-candidateinfo-cards", "children")
-#     [
-#         Input('candidate-dropdown-candidateinfo-filter', 'value')
-#         , Input("candidate-dropdown-candidateinfo-ordercategory", "value")
-#         , Input("candidate-dropdown-candidateinfo-order", "value")
-#     ]
-# )
-# def candidate_candidateinfo_(filter,order_category, order):
-#     return True
+
+
+@app.callback(
+    Output("candidate-components-candidateinfo", "children"),
+    Output("candidate-heading-candidateinfo-candidatecount", "children"),
+    [
+        Input('candidate-dropdown-candidateinfo-filter', 'value')
+        , Input("candidate-dropdown-candidateinfo-ordercategory", "value")
+        , Input("candidate-dropdown-candidateinfo-order", "value")
+    ]
+)
+def get_candidateinfo_card(filter, order_category, order):
+    vaccine_candidate = vp_df['Vaccine candidate'].tolist()
+    location = vp_df['Developer Location'].tolist()
+    phase = vp_df['Trial Phase'].tolist()
+    doses = vp_df['Doses'].tolist()
+
+    layout = []
+
+    for x in range(len(vaccine_candidate)):
+        graphid = "candidate-graph-candidateinfo-{}".format(x)
+
+        layout.append(html.Div([dcc.Graph(id=graphid)], className="six columns"))
+        layout.append(html.Div([
+            html.H5(vaccine_candidate[x])
+            , html.Li("Developer Location : {}".format(location[x]))
+            , html.Li("Development Phase : {}".format(phase[x]))
+            , html.Li("Dose(s) required : {}".format(doses[x]))
+        ], className="six columns"))
+
+    layout2 = []
+    loop_count = len(layout) // 2
+    for x in range(loop_count):
+        pointer = x * 2
+        layout2.append(html.Div(children=[layout[pointer], layout[pointer + 1]], className='six columns'))
+
+    layout3 = []
+    loop_count = len(layout2) // 2
+    for x in range(loop_count):
+        pointer = x * 2
+        layout3.append(html.Div(children=[layout2[pointer], layout2[pointer + 1]], className='row'))
+
+    if len(layout2) % 2:
+        layout3.append(html.Div(children=[layout2[-1]], className='row'))
+
+    return True, True
