@@ -58,6 +58,8 @@ def generate_dropdown_option(label, id, options, value, placeholder='Select the 
 
 # Website Builder
 layout = html.Div([
+    html.H1('Vaccine Candidate'),
+    html.P('Last data update: 1 April 2021'),
     html.Div([
         html.Div([
             html.Div([
