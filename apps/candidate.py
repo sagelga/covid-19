@@ -11,20 +11,10 @@ import time
 
 from app import app
 
-# Data Import
-url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-primary.csv'
-df = pd.read_csv(url)
+from component import knowledgepotalia
 
-# Select data
-df = df[['Buyer/recipient', 'Vaccine candidate', 'Deal Type', 'Finalized Commitment', 'Doses committed (in millions)',
-         'Price (in USD million)', 'Price/Dose (in USD)', 'Doses/capita', 'Population covered']]
-df = df.dropna()
+df = knowledgepotalia.df
 
-# Sort data using Buyer + Vaccine candidate
-df = df.sort_values(by=['Buyer/recipient', 'Vaccine candidate'])
-
-all_buyer = df['Buyer/recipient'].unique()
-# all_candidates = df['Vaccine candidate'].unique()
 price_options = [
     {'label': 'Vaccine Name', 'value': 'name'}
     , {'label': 'Vaccine Price', 'value': 'price'}
@@ -34,10 +24,6 @@ price_options = [
 url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-vaccineProvider.csv'
 vp_df = pd.read_csv(url)
 
-
-# Secondary Trade Data Import
-# url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-secondary.csv'
-# l2_df = pd.read_csv(url)
 
 def generate_dropdown_option(label, id, options, value, placeholder='Select the option ...', multi=False):
     layout = html.Div([
@@ -66,14 +52,16 @@ layout = html.Div([
                 html.H2('Vaccine on Hand'),
             ], className='ten columns'),
             html.Div([
-                html.Button(children='Switch to ... mode', id='candidate-button-chartoption-buyer', n_clicks=0),
+                html.Button(children='Switch to Vaccine Candidate', id='candidate-button-chartoption-buyer',
+                            n_clicks=0),
             ], className='two columns'),
         ], className='row'),
 
         html.Div([
             generate_dropdown_option(label='📊 Vaccine Buyer', id='candidate-dropdown-chartoption-buyer',
-                                     options=[{'label': x, 'value': x} for x in all_buyer],
-                                     value=all_buyer,
+                                     options=[{'label': x, 'value': x} for x in
+                                              df['Country'].unique()],
+                                     value=[x for x in df['Country'].unique()],
                                      placeholder='Filter by Buyer'
                                      , multi=True),
             # html.Button('Reset', id='candidate-button-chartoption-buyer', n_clicks=0),
@@ -164,9 +152,9 @@ layout = html.Div([
     Input("candidate-dropdown-chartoption-buyer", "value")
 )
 def candidate_graph_vaccinecount(buyer):
-    mask = df['Buyer/recipient'].isin(buyer)
+    mask = df['Country'].isin(buyer)
 
-    fig = px.bar(df[mask], x="Buyer/recipient", y="Doses committed (in millions)", color="Vaccine candidate")
+    fig = px.bar(df[mask], x="Country", y="Doses", color="Vaccine Candidate")
     fig.update_layout(legend=dict(
         orientation="h",
         yanchor="bottom",
@@ -180,11 +168,13 @@ def candidate_graph_vaccinecount(buyer):
 
 @app.callback(
     Output("candidate-graph-price", "figure"),
-    [Input("candidate-dropdown-priceoption-category", "value")
-        , Input("candidate-dropdown-priceoption-order", "value")]
+    [
+        Input("candidate-dropdown-priceoption-category", "value")
+        , Input("candidate-dropdown-priceoption-order", "value")
+    ]
 )
 def candidate_graph_vaccineprice(order_category, order):
-    fig = px.box(df, x='Vaccine candidate', y='Price/Dose (in USD)')
+    fig = px.box(df, x='Vaccine Candidate', y='Price/Dose')
     return fig
 
 
