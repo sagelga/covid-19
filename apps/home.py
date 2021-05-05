@@ -11,36 +11,10 @@ from datetime import datetime, timedelta
 import time
 
 from app import app
+from component import owid
 
-# Data Import
-url = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv'
-df = pd.read_csv(url)
+df = owid.df
 
-# Data selection
-df = df[['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases', 'total_deaths', 'new_deaths',
-         'total_cases_per_million', 'new_cases_per_million', 'total_deaths_per_million', 'new_deaths_per_million',
-         'icu_patients', 'icu_patients_per_million', 'hosp_patients', 'hosp_patients_per_million', 'new_tests',
-         'total_tests', 'total_tests_per_thousand', 'new_tests_per_thousand', 'positive_rate', 'tests_per_case',
-         'tests_units', 'total_vaccinations', 'people_vaccinated', 'people_fully_vaccinated', 'new_vaccinations',
-         'stringency_index', 'population']]
-
-# NA Data Drop
-df = df.dropna(subset=[
-    'date'
-    , 'continent'
-    , 'location'
-])
-
-# Data Transform
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values(by=['date', 'location'])
-
-# Calculate fields
-df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['population'])
-df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
-df['lethal_rate'] = 100 * (df['total_deaths'] / df['total_cases'])
-
-# all_country = sorted(df["location"].unique())
 all_country = np.sort(df["location"].unique())
 
 a = int((time.time() / 900 - 3) / 2 % 24)
@@ -231,6 +205,12 @@ layout = html.Div([
     ]
 )
 def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
+    def draw_indicator(line_color, value):
+        return fig.add_shape(
+            type="line", line_color=line_color, line_width=3, opacity=1, line_dash="dot",
+            x0=0, x1=1, xref="paper", y0=value, y1=value, yref="y"
+        )
+
     # - Check a required column
     if not len(countries):
         return go.Figure(go.Indicator(
@@ -295,29 +275,18 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
                       , yaxis_title=get_casetype(case_type)
                       , hovermode="x")
 
-    # - Chart Indicator -
+    if type(chart_indicator) != list: return fig
+
+    # - Add Chart Indicator -
     if type(chart_indicator) == list:
         if 'max' in chart_indicator:  # Max Line
-            y = df[mask][case_type].max()
-            fig.add_shape(
-                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
-            )
+            draw_indicator("salmon", df[mask][case_type].max())
 
         if 'avg' in chart_indicator:  # Average Line
-            # y = (df[mask][case_type].sum()) / len(time_list)
-            y = (df[mask][case_type]).mean()
-            fig.add_shape(
-                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
-            )
+            draw_indicator("salmon", df[mask][case_type].mean())
 
         if 'min' in chart_indicator:  # Min Line
-            y = df[mask][case_type].min()
-            fig.add_shape(
-                type="line", line_color="salmon", line_width=3, opacity=1, line_dash="dot",
-                x0=0, x1=1, xref="paper", y0=y, y1=y, yref="y"
-            )
+            draw_indicator("salmon", df[mask][case_type].min())
 
     return fig
 
