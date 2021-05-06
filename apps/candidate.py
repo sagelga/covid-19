@@ -75,29 +75,29 @@ layout = html.Div([
 
     html.Div([
         html.H2('Vaccine Price'),
-        html.P('DISCLAIMER : Only showing Public prices. Any private Private price deals are excluded.'),
-        # html.Div([
-        #     html.Div([
-        #         generate_dropdown_option(label='Order by'
-        #                                  , id='candidate-dropdown-priceoption-category'
-        #                                  , options=price_options
-        #                                  , value='name'
-        #                                  , placeholder='Order by ...'
-        #                                  , multi=False
-        #                                  , searchable=True),
-        #
-        #     ], className='two columns'),
-        #     html.Div([
-        #         generate_dropdown_option(label='Order by'
-        #                                  , id='candidate-dropdown-priceoption-order'
-        #                                  , options=[{'label': 'Ascending', 'value': 'asc'},
-        #                                             {'label': 'Descending', 'value': 'desc'}]
-        #                                  , value='asc'
-        #                                  , placeholder='Order by ...'
-        #                                  , multi=False
-        #                                  , searchable=True),
-        #     ], className='two columns'),
-        # ], className='row'),
+        html.P('DISCLAIMER : Price-disclosed or Donation deals/arrangements are excluded.'),
+        html.Div([
+            html.Div([
+                generate_dropdown_option(label='Order by'
+                                         , id='candidate-dropdown-priceoption-category'
+                                         , options=price_options
+                                         , value='name'
+                                         , placeholder='Order by ...'
+                                         , multi=False
+                                         , searchable=True),
+
+            ], className='two columns'),
+            html.Div([
+                generate_dropdown_option(label='Order'
+                                         , id='candidate-dropdown-priceoption-order'
+                                         , options=[{'label': 'Ascending', 'value': 'asc'},
+                                                    {'label': 'Descending', 'value': 'desc'}]
+                                         , value='asc'
+                                         , placeholder='Order by ...'
+                                         , multi=False
+                                         , searchable=True),
+            ], className='two columns'),
+        ], className='row'),
 
         html.Div(children=[
             dcc.Graph(id="candidate-graph-price")
