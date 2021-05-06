@@ -15,6 +15,8 @@ from component import knowledgepotalia
 
 df = knowledgepotalia.df
 
+all_country = sorted(df['Country'].unique().tolist())
+
 price_options = [
     {'label': 'Vaccine Name', 'value': 'name'}
     , {'label': 'Vaccine Price', 'value': 'price'}
@@ -25,7 +27,7 @@ url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowled
 vp_df = pd.read_csv(url)
 
 
-def generate_dropdown_option(label, id, options, value, placeholder='Select the option ...', multi=False):
+def generate_dropdown_option(label, id, options, value, placeholder, multi, searchable):
     layout = html.Div([
         html.Label(label),
         dcc.Dropdown(
@@ -34,7 +36,7 @@ def generate_dropdown_option(label, id, options, value, placeholder='Select the 
             , value=value
             , placeholder=placeholder
             , multi=multi, clearable=multi
-            , searchable=False
+            , searchable=searchable
             , persistence=True, persistence_type='session'
         )
     ])
@@ -45,7 +47,7 @@ def generate_dropdown_option(label, id, options, value, placeholder='Select the 
 # Website Builder
 layout = html.Div([
     html.H1('Vaccine Candidate'),
-    html.P('Last data update: 1 April 2021'),
+    html.P('Last data update: 30 April 2021'),
     html.Div([
         html.Div([
             html.Div([
@@ -59,11 +61,10 @@ layout = html.Div([
 
         html.Div([
             generate_dropdown_option(label='📊 Vaccine Buyer', id='candidate-dropdown-chartoption-buyer',
-                                     options=[{'label': x, 'value': x} for x in
-                                              df['Country'].unique()],
-                                     value=[x for x in df['Country'].unique()],
+                                     options=[{'label': x, 'value': x} for x in all_country],
+                                     value=[x for x in all_country],
                                      placeholder='Filter by Buyer'
-                                     , multi=True),
+                                     , multi=True, searchable=True),
             # html.Button('Reset', id='candidate-button-chartoption-buyer', n_clicks=0),
         ]),
 
@@ -75,24 +76,28 @@ layout = html.Div([
     html.Div([
         html.H2('Vaccine Price'),
         html.P('DISCLAIMER : Only showing Public prices. Any private Private price deals are excluded.'),
-        html.Div([
-            html.Div([], className='ten columns'),
-            html.Div([
-                generate_dropdown_option(label='Order by'
-                                         , id='candidate-dropdown-priceoption-category'
-                                         , options=price_options
-                                         , value='name'
-                                         , placeholder='Order by ...'
-                                         , multi=False),
-                generate_dropdown_option(label='Order by'
-                                         , id='candidate-dropdown-priceoption-order'
-                                         , options=[{'label': 'Ascending', 'value': 'asc'},
-                                                    {'label': 'Descending', 'value': 'desc'}]
-                                         , value='asc'
-                                         , placeholder='Order by ...'
-                                         , multi=False),
-            ], className='two columns'),
-        ], className='row'),
+        # html.Div([
+        #     html.Div([
+        #         generate_dropdown_option(label='Order by'
+        #                                  , id='candidate-dropdown-priceoption-category'
+        #                                  , options=price_options
+        #                                  , value='name'
+        #                                  , placeholder='Order by ...'
+        #                                  , multi=False
+        #                                  , searchable=True),
+        #
+        #     ], className='two columns'),
+        #     html.Div([
+        #         generate_dropdown_option(label='Order by'
+        #                                  , id='candidate-dropdown-priceoption-order'
+        #                                  , options=[{'label': 'Ascending', 'value': 'asc'},
+        #                                             {'label': 'Descending', 'value': 'desc'}]
+        #                                  , value='asc'
+        #                                  , placeholder='Order by ...'
+        #                                  , multi=False
+        #                                  , searchable=True),
+        #     ], className='two columns'),
+        # ], className='row'),
 
         html.Div(children=[
             dcc.Graph(id="candidate-graph-price")
@@ -100,14 +105,14 @@ layout = html.Div([
 
     ]),  # Vaccine Price
 
-    html.Div([
-        html.H2('Insights'),
-
-        html.Div(children=[
-            dcc.Graph(id="company-insight-dashboard")
-        ], className="twelve columns"),
-
-    ]),  # Insights
+    # html.Div([
+    #     html.H2('Insights'),
+    #
+    #     html.Div(children=[
+    #         dcc.Graph(id="company-insight-dashboard")
+    #     ], className="twelve columns"),
+    #
+    # ]),  # Insights
 
     html.Div([
         html.H2('About each Vaccine'),
@@ -117,10 +122,8 @@ layout = html.Div([
 
         html.Div(children=[
             html.Div(children=[
-                html.H4('Showing x of x available candidates'
-                        , id='candidate-heading-candidateinfo-candidatecount'
-                        )
-            ], className='eight columns'),
+                html.H4(id='candidate-heading-candidateinfo-candidatecount')
+            ], className='six columns'),
 
             html.Div(children=[
                 generate_dropdown_option(label='Filter by'
@@ -128,20 +131,25 @@ layout = html.Div([
                                          , options=[]
                                          , value=[]
                                          , placeholder='Filter by ...'
-                                         , multi=True)
-            ], className='two columns'),
+                                         , multi=True
+                                         , searchable=True)
+            ], className='three columns'),
             html.Div(children=[
                 generate_dropdown_option(label='Order by'
-                                         , id='candidate-dropdown-candidateinfo-order'
-                                         , options=[]
-                                         , value=[]
+                                         , id='candidate-dropdown-candidateinfo-ordercategory'
+                                         , options=[{'label': 'Vaccine Candidate', 'value': 'Vaccine Candidate'},
+                                                    {'label': 'Developer Location', 'value': 'Developer Location'},
+                                                    {'label': 'Trial Phase', 'value': 'Trial Phase'},
+                                                    {'label': 'Dose Needed', 'value': 'Dose Needed'},
+                                                    ]
+                                         , value='Vaccine Candidate'
                                          , placeholder='Order by ...'
-                                         , multi=True)
-            ], className='two columns'),
+                                         , multi=False
+                                         , searchable=False)
+            ], className='three columns'),
         ], className='row'),
 
         html.Br(),
-        # generate_candidateinfo_card()
         html.Div(id='candidate-components-candidateinfo'),
     ]),  # Vaccine Info Card
 ])
@@ -154,14 +162,12 @@ layout = html.Div([
 def candidate_graph_vaccinecount(buyer):
     mask = df['Country'].isin(buyer)
 
-    fig = px.bar(df[mask], x="Country", y="Doses", color="Vaccine Candidate")
-    fig.update_layout(legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1
-    ))
+    fig = px.bar(df[mask],
+                 x="Doses", y="Vaccine Candidate",
+                 color="Vaccine Candidate", orientation='h',
+                 hover_data=['Country'])
+    fig.update_layout(showlegend=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
     return fig
 
@@ -175,50 +181,52 @@ def candidate_graph_vaccinecount(buyer):
 )
 def candidate_graph_vaccineprice(order_category, order):
     fig = px.box(df, x='Vaccine Candidate', y='Price/Dose')
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
 
 
 @app.callback(
-    Output("candidate-components-candidateinfo", "children"),
     Output("candidate-heading-candidateinfo-candidatecount", "children"),
+    Output("candidate-components-candidateinfo", "children"),
     [
         Input('candidate-dropdown-candidateinfo-filter', 'value')
         , Input("candidate-dropdown-candidateinfo-ordercategory", "value")
-        , Input("candidate-dropdown-candidateinfo-order", "value")
     ]
 )
-def get_candidateinfo_card(filter, order_category, order):
-    vaccine_candidate = vp_df['Vaccine candidate'].tolist()
-    location = vp_df['Developer Location'].tolist()
-    phase = vp_df['Trial Phase'].tolist()
-    doses = vp_df['Doses'].tolist()
+def get_candidateinfo_card(filter, order_category):
+    df = knowledgepotalia.info_df
+    df = df.sort_values(by=order_category) if len(order_category) else df
+
+    candidate = df['Vaccine Candidate'].tolist()
+    location = df['Developer Location'].tolist()
+    phase = df['Trial Phase'].tolist()
+    doses = df['Dose Needed'].tolist()
+
+    heading = html.H4('Showing x of x candidates')
 
     layout = []
 
-    for x in range(len(vaccine_candidate)):
-        graphid = "candidate-graph-candidateinfo-{}".format(x)
+    # Creating elements
+    for x in range(len(candidate)):
+        graphid = "candidate-graph-candidateinfo-candidate{}".format(x)
 
-        layout.append(html.Div([dcc.Graph(id=graphid)], className="six columns"))
         layout.append(html.Div([
-            html.H5(vaccine_candidate[x])
-            , html.Li("Developer Location : {}".format(location[x]))
-            , html.Li("Development Phase : {}".format(phase[x]))
-            , html.Li("Dose(s) required : {}".format(doses[x]))
-        ], className="six columns"))
+            html.Div([
+                html.Div([
+                    html.H4(candidate[x])
+                ], className='row'),
+                html.Div([
+                    html.Div([
+                        html.Li("Developer Location : {}".format(location[x]))
+                        , html.Li("Development Phase : {}".format(phase[x]))
+                        , html.Li("Dose(s) required : {}".format(doses[x]))
+                    ], className="six columns"),
+                    html.Div([dcc.Graph(id=graphid)], className="six columns"),
+                ], className='row')
+            ], style={'border-radius': '10px', 'border': '2px solid #3d4e76', 'padding': '20px'}),
 
-    layout2 = []
-    loop_count = len(layout) // 2
-    for x in range(loop_count):
-        pointer = x * 2
-        layout2.append(html.Div(children=[layout[pointer], layout[pointer + 1]], className='six columns'))
+            html.Br(),
+        ])
+        )
 
-    layout3 = []
-    loop_count = len(layout2) // 2
-    for x in range(loop_count):
-        pointer = x * 2
-        layout3.append(html.Div(children=[layout2[pointer], layout2[pointer + 1]], className='row'))
-
-    if len(layout2) % 2:
-        layout3.append(html.Div(children=[layout2[-1]], className='row'))
-
-    return True, True
+    return heading, layout
