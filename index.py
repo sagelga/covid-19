@@ -59,7 +59,7 @@ footer = html.Div(
 
         html.P(['Created with ❤️ by ', html.A("@sagelga", href="https://github.com/sagelga/covid-vaccine")]),
     ]
-    , className="footer", style={'background-color': '#e5ecf6', 'text-align': 'center'}
+    , className="footer", style={'backgroundColor': '#e5ecf6', 'textAlign': 'center'}
 )
 
 app.layout = html.Div([

@@ -99,7 +99,7 @@ layout = html.Div([
                 , persistence=True
                 , persistence_type='session'
             ),
-        ], className="three columns"),
+        ], className="six columns"),
 
         html.Div(children=[
             html.Label(curr_time + ' Time Range'),
@@ -142,23 +142,23 @@ layout = html.Div([
             ),
         ], className='three columns'),
 
-        html.Div(children=[
-            html.Label('📊 Regression Line'),
-            dcc.Dropdown(
-                id="home-dropdown-chartregressionline"
-                , options=[
-                    {'label': 'Linear Regression Trend Line', 'value': 'linear'}
-                    , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
-                ]
-                , placeholder="Select an option (optional)"
-                , disabled=True
-                , multi=True
-                , clearable=True
-                , searchable=False
-                , persistence=True
-                , persistence_type='session'
-            ),
-        ], className='three columns'),
+        # html.Div(children=[
+        #     html.Label('📊 Regression Line'),
+        #     dcc.Dropdown(
+        #         id="home-dropdown-chartregressionline"
+        #         , options=[
+        #             {'label': 'Linear Regression Trend Line', 'value': 'linear'}
+        #             , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
+        #         ]
+        #         , placeholder="Select an option (optional)"
+        #         , disabled=True
+        #         , multi=True
+        #         , clearable=True
+        #         , searchable=False
+        #         , persistence=True
+        #         , persistence_type='session'
+        #     ),
+        # ], className='three columns'),
     ], className='row'),
 
     html.Br(),
@@ -169,24 +169,7 @@ layout = html.Div([
     ], className="twelve columns"),
 
     html.Br(),
-
     html.H2('Statistics'),
-
-    html.Div(children=[
-        html.Label('🌎 Countries'),
-        dcc.Dropdown(
-            id="home-dropdown-stats-country"
-            , options=[{"label": x, "value": x}
-                       for x in all_country]
-            , placeholder="Select a country"
-            , multi=True
-            , clearable=True
-            , searchable=True
-            , persistence=True
-            , persistence_type='session'
-        ),
-    ]),
-
     html.Br(),
 
     html.Div(id='home-overall-card', children=[]),
@@ -274,6 +257,13 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
                       , xaxis_title="Date"
                       , yaxis_title=get_casetype(case_type)
                       , hovermode="x")
+    fig.update_layout(legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    ))
 
     if type(chart_indicator) != list: return fig
 
@@ -293,7 +283,7 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
 
 @app.callback(
     Output('home-overall-card', "children"),
-    [Input("home-dropdown-stats-country", "value")]
+    [Input("home-dropdown-country", "value")]
 )
 def template_overall_card(country):
     if not country:
@@ -305,7 +295,7 @@ def template_overall_card(country):
             html.Div([
                 html.Div([
                     html.Div([
-                        html.H5(country_name),
+                        html.H4(country_name),
                     ], className='nine columns'),
 
                     html.Div([
