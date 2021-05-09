@@ -8,7 +8,6 @@ import dash_html_components as html
 from plotly import express as px
 from plotly import graph_objects as go
 from datetime import datetime, timedelta
-import time
 
 from app import app
 from component import owid
@@ -16,9 +15,6 @@ from component import owid
 df = owid.df
 
 all_country = np.sort(df["location"].unique())
-
-a = int((time.time() / 900 - 3) / 2 % 24)
-curr_time = chr(128336 + a // 2 + a % 2 * 12)
 
 # Reused Components
 option_case_type = [
@@ -102,7 +98,7 @@ layout = html.Div([
         ], className="six columns"),
 
         html.Div(children=[
-            html.Label(curr_time + ' Time Range'),
+            html.Label('🕖 Time Range'),
             dcc.Dropdown(
                 id="home-dropdown-timerange",
                 options=[
@@ -253,8 +249,7 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
 
     # Add chart templates + layouts
     fig.update_traces(hovertemplate=None)
-    fig.update_layout(title=generate_title(countries, case_type)
-                      , xaxis_title="Date"
+    fig.update_layout(xaxis_title="Date"
                       , yaxis_title=get_casetype(case_type)
                       , hovermode="x")
     fig.update_layout(legend=dict(
@@ -426,19 +421,6 @@ def update_overall_card(stats_option, id):
 
     return figure[0], figure[1], figure[2], figure[3], figure[4], figure[5], figure[6], figure[7], figure[8], \
            figure[9], figure[10], figure[11], figure[12], figure[13], figure[14], figure[15]
-
-
-def generate_title(countries, case_type):
-    # Case type search
-    case_type = get_casetype(case_type)
-
-    # Country list builder
-    if len(countries) < 3:
-        title_country = ' and '.join([str(_) for _ in countries])
-    else:
-        title_country = str(len(countries)) + " selected countries"
-
-    return "{} in {}".format(case_type, title_country)
 
 
 def get_casetype(case_type):
