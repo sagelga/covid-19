@@ -24,10 +24,6 @@ price_options = [
     , {'label': 'Vaccine Price', 'value': 'price'}
 ]
 
-# Vaccine Provider Card Import
-url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-vaccineProvider.csv'
-vp_df = pd.read_csv(url)
-
 
 def generate_dropdown_option(label, id, options, value, placeholder, multi, searchable):
     layout = html.Div([
