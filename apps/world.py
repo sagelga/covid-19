@@ -6,18 +6,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
 from datetime import datetime, timedelta
-import time
 
 from app import app
 from component import owid
 
 df = owid.df
 
-# all_country = sorted(df["location"].unique())
 all_country = df["location"].unique()
-
-a = int((time.time() / 900 - 3) / 2 % 24)
-curr_time = chr(128336 + a // 2 + a % 2 * 12)
 
 # Website Builder
 layout = html.Div([
@@ -28,7 +23,7 @@ layout = html.Div([
 
         html.Div([
             html.Div(children=[
-                html.Label('{} Time Range'.format(curr_time)),
+                html.Label('🕖 Time Range'),
                 dcc.Dropdown(
                     id="world-dropdown-choroplethview-timerange",
                     options=[
@@ -95,7 +90,7 @@ layout = html.Div([
     Output("world-graph-choroplethview", "figure"),
     Input("world-dropdown-choroplethview-timerange", "value")
 )
-def sth(time_range):
+def world_graph_worldmap(time_range):
     # - Time Range -
     time_max = datetime.today()
     time_list = []
