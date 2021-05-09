@@ -6,13 +6,15 @@ url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowled
 df = pd.read_csv(url, encoding='latin-1')
 
 # Rename columns
-df = df.rename(columns={'Buyer/recipient': 'Country',
-                        'Doses committed (in millions)': 'Doses',
-                        'Vaccine candidate': 'Vaccine Candidate',
-                        'Price (in USD million)': 'Price',
-                        'Price/Dose (in USD)': 'Price/Dose',
-                        ' Population ': 'Population'}
-               )
+df = df.rename(columns={
+    'Buyer/recipient': 'Country',
+    'Doses committed (in millions)': 'Doses',
+    'Vaccine candidate': 'Vaccine Candidate',
+    'Price (in USD million)': 'Price',
+    'Price/Dose (in USD)': 'Price/Dose',
+    ' Population ': 'Population'
+}
+)
 
 # l1_df Select data
 l1_df = df[

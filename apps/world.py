@@ -5,7 +5,6 @@ from dash.dependencies import Input, Output, State, ALL
 import dash_core_components as dcc
 import dash_html_components as html
 from plotly import express as px
-from plotly import graph_objects as go
 from datetime import datetime, timedelta
 import time
 
@@ -13,9 +12,6 @@ from app import app
 from component import owid
 
 df = owid.df
-
-# Data Transform
-df['date_str'] = df['date'].dt.date.apply(lambda x: str(x))
 
 # all_country = sorted(df["location"].unique())
 all_country = df["location"].unique()

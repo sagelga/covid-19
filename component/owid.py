@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 # Data Import
 url = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv'
@@ -29,3 +28,5 @@ df['people_vaccinated_per_population'] = 100 * (df['people_vaccinated'] / df['po
 df['people_fully_vaccinated_per_population'] = 100 * (df['people_fully_vaccinated'] / df['population'])
 df['case_per_population'] = 100 * (df['total_cases'] / df['population'])
 df['lethal_rate'] = 100 * (df['total_deaths'] / df['total_cases'])
+
+df['date_str'] = df['date'].dt.date.apply(lambda x: str(x))
