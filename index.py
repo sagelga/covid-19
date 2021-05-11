@@ -8,6 +8,7 @@ from app import server
 
 # Connect to your app pages
 from apps import home
+from apps import explore
 from apps import world
 from apps import candidate
 from apps import mobility
@@ -19,6 +20,7 @@ location = dcc.Location(id='url', refresh=False)
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/")),
+        dbc.NavItem(dbc.NavLink("Explore", href="/explore")),
         dbc.NavItem(dbc.NavLink("World Trends", href="/world")),
         dbc.NavItem(dbc.NavLink("Mobility Reports", href="/mobility")),
         dbc.NavItem(dbc.NavLink("Vaccine Candidate", href="/candidate")),
@@ -77,6 +79,8 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/':
         return home.layout
+    if pathname == '/explore':
+        return explore.layout
     if pathname == '/world':
         return world.layout
     if pathname == '/candidate':
