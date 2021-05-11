@@ -45,7 +45,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label('🌎 Countries'),
             dcc.Dropdown(
-                id="home-dropdown-country"
+                id="explore-dropdown-country"
                 , options=[{"label": x, "value": x}
                            for x in all_country]
                 , placeholder="Select a country"
@@ -61,7 +61,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label('📂 Case Type'),
             dcc.Dropdown(
-                id="home-dropdown-casetype"
+                id="explore-dropdown-casetype"
                 , options=option_case_type
                 , placeholder="Select a type of case"
                 , value='new_cases'
@@ -80,7 +80,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label('📊 Chart Type'),
             dcc.Dropdown(
-                id="home-dropdown-charttype"
+                id="explore-dropdown-charttype"
                 , options=[
                     {'label': '📈 Line Chart', 'value': 'line'}
                     , {'label': '📊 Scatter Plot', 'value': 'scatter'}
@@ -100,7 +100,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label('🕖 Time Range'),
             dcc.Dropdown(
-                id="home-dropdown-timerange",
+                id="explore-dropdown-timerange",
                 options=[
                     {'label': 'All time', 'value': 'all'}
                     , {'label': '7 Days', 'value': '7'}
@@ -123,7 +123,7 @@ layout = html.Div([
         html.Div(children=[
             html.Label('📊 Chart Indicators'),
             dcc.Dropdown(
-                id="home-dropdown-chartindicator"
+                id="explore-dropdown-chartindicator"
                 , options=[
                     {'label': 'Highest Threshold', 'value': 'max'}
                     , {'label': 'Average Threshold', 'value': 'avg'}
@@ -141,7 +141,7 @@ layout = html.Div([
         # html.Div(children=[
         #     html.Label('📊 Regression Line'),
         #     dcc.Dropdown(
-        #         id="home-dropdown-chartregressionline"
+        #         id="explore-dropdown-chartregressionline"
         #         , options=[
         #             {'label': 'Linear Regression Trend Line', 'value': 'linear'}
         #             , {'label': 'Log-linear Trend Line', 'value': 'log_linear'}
@@ -161,26 +161,26 @@ layout = html.Div([
 
     # Chart
     html.Div(children=[
-        dcc.Graph(id="home-result-chart")
+        dcc.Graph(id="explore-result-chart")
     ], className="twelve columns"),
 
     html.Br(),
     html.H2('Statistics'),
     html.Br(),
 
-    html.Div(id='home-overall-card', children=[]),
+    html.Div(id='explore-overall-card', children=[]),
 
 ])
 
 
 @app.callback(
-    Output("home-result-chart", "figure"),
+    Output("explore-result-chart", "figure"),
     [
-        Input("home-dropdown-country", "value")
-        , Input("home-dropdown-casetype", "value")
-        , Input("home-dropdown-charttype", "value")
-        , Input("home-dropdown-timerange", "value")
-        , Input("home-dropdown-chartindicator", "value")
+        Input("explore-dropdown-country", "value")
+        , Input("explore-dropdown-casetype", "value")
+        , Input("explore-dropdown-charttype", "value")
+        , Input("explore-dropdown-timerange", "value")
+        , Input("explore-dropdown-chartindicator", "value")
     ]
 )
 def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
@@ -277,8 +277,8 @@ def update_graph(countries, case_type, chart_type, time_range, chart_indicator):
 
 
 @app.callback(
-    Output('home-overall-card', "children"),
-    [Input("home-dropdown-country", "value")]
+    Output('explore-overall-card', "children"),
+    [Input("explore-dropdown-country", "value")]
 )
 def template_overall_card(country):
     if not country:
@@ -295,7 +295,7 @@ def template_overall_card(country):
 
                     html.Div([
                         dcc.Dropdown(
-                            id={"type": "home-dropdown-statistics-option", 'index': country_name}
+                            id={"type": "explore-dropdown-statistics-option", 'index': country_name}
                             , options=[
                                 {'label': 'by Population', 'value': 'population'}
                             ]
@@ -374,8 +374,8 @@ def template_overall_card(country):
     Output({'index': MATCH, 'type': 'people_vaccinated'}, "figure"),
     Output({'index': MATCH, 'type': 'label-people_fully_vaccinated'}, "children"),
     Output({'index': MATCH, 'type': 'people_fully_vaccinated'}, "figure"),
-    [Input({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "value")
-        , State({'index': MATCH, 'type': 'home-dropdown-statistics-option'}, "id")]
+    [Input({'index': MATCH, 'type': 'explore-dropdown-statistics-option'}, "value")
+        , State({'index': MATCH, 'type': 'explore-dropdown-statistics-option'}, "id")]
 )
 def update_overall_card(stats_option, id):
     # Compute the values by pulling data from DF
