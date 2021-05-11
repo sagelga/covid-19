@@ -41,8 +41,6 @@ layout = html.Div([
                     , multi=False
                     , clearable=False
                     , searchable=False
-                    , persistence=True
-                    , persistence_type='session'
                 ),
             ], className="three columns"),
         ], className='row'),
