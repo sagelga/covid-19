@@ -122,8 +122,8 @@ def world_graph_worldmap(time_range):
     fig.update_traces(hovertemplate='<br>'.join([
         "%{customdata[0]}"
         , ''
-        , 'Population: %{customdata[1]}'
-        , 'Case per Population: %{customdata[2]}:.4f'
+        , 'Population: %{customdata[1]:,}'
+        , 'Case per Population: %{customdata[2]:.4f}%'
     ]))
     fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
