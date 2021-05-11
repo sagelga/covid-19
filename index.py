@@ -11,6 +11,7 @@ from apps import home
 from apps import world
 from apps import candidate
 from apps import mobility
+from apps import fourOfour
 
 # Website Builder
 location = dcc.Location(id='url', refresh=False)
@@ -23,6 +24,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Vaccine Candidate", href="/candidate")),
     ],
     brand="COVID-19 Data Explorer",
+    fluid=True,
     color="dark",
     dark=True,
 )
@@ -73,6 +75,8 @@ app.layout = html.Div([
               [Input('url', 'pathname')]
               )
 def display_page(pathname):
+    if pathname == '/':
+        return home.layout
     if pathname == '/world':
         return world.layout
     if pathname == '/candidate':
@@ -81,7 +85,7 @@ def display_page(pathname):
         return mobility.layout
 
     # If URL does not match any page, returns to home layout
-    return home.layout
+    return fourOfour.layout
 
 
 if __name__ == '__main__':
