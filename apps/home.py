@@ -22,7 +22,7 @@ option_case_type = [
     , {'label': 'New deaths attributed', 'value': 'new_deaths'}
     , {'label': 'Total confirmed cases', 'value': 'total_cases'}
     , {'label': 'Total deaths attributed', 'value': 'total_deaths'}
-    , {'label': 'Lethality Rate', 'value': 'lethal_rate'}
+    , {'label': 'Mortality rate', 'value': 'mortality_rate'}
     , {'label': 'Vaccinated one dose', 'value': 'people_vaccinated'}
     , {'label': 'Vaccinated all doses', 'value': 'people_fully_vaccinated'}
     , {'label': 'Patient in Hospital', 'value': 'hosp_patients'}
@@ -56,7 +56,7 @@ layout = html.Div([
                 , persistence=True
                 , persistence_type='session'
             ),
-        ], className="nine columns"),
+        ], className="six columns"),
 
         html.Div(children=[
             html.Label('📂 Case Type'),
@@ -71,7 +71,7 @@ layout = html.Div([
                 , persistence=True
                 , persistence_type='session'
             ),
-        ], className="three columns"),
+        ], className="six columns"),
     ], className="row"),
 
     html.Br(),
