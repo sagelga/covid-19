@@ -8,9 +8,11 @@ from app import server
 
 # Connect to your app pages
 from apps import home
+from apps import explore
 from apps import world
 from apps import candidate
 from apps import mobility
+from apps import fourOfour
 
 # Website Builder
 location = dcc.Location(id='url', refresh=False)
@@ -18,11 +20,13 @@ location = dcc.Location(id='url', refresh=False)
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/")),
+        dbc.NavItem(dbc.NavLink("Explore", href="/explore")),
         dbc.NavItem(dbc.NavLink("World Trends", href="/world")),
         dbc.NavItem(dbc.NavLink("Mobility Reports", href="/mobility")),
         dbc.NavItem(dbc.NavLink("Vaccine Candidate", href="/candidate")),
     ],
     brand="COVID-19 Data Explorer",
+    fluid=True,
     color="dark",
     dark=True,
 )
@@ -73,6 +77,10 @@ app.layout = html.Div([
               [Input('url', 'pathname')]
               )
 def display_page(pathname):
+    if pathname == '/':
+        return home.layout
+    if pathname == '/explore':
+        return explore.layout
     if pathname == '/world':
         return world.layout
     if pathname == '/candidate':
@@ -81,7 +89,7 @@ def display_page(pathname):
         return mobility.layout
 
     # If URL does not match any page, returns to home layout
-    return home.layout
+    return fourOfour.layout
 
 
 if __name__ == '__main__':
