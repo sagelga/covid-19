@@ -11,7 +11,7 @@ df = df.rename(columns={
     'Doses committed (in millions)': 'Doses',
     'Vaccine candidate': 'Vaccine Candidate',
     'Price (in USD million)': 'Price',
-    'Price/Dose (in USD)': 'Price/Dose',
+    ' Price/Dose (in USD) ': 'Price/Dose',
     ' Population ': 'Population'
 }
 )
