@@ -1,11 +1,11 @@
 # COVID-19 Data Explorer
 COVID-19 Data Explorer is a dashboard-data explorer for COVID-19 data around the world; running on Python using Plotly/Dash framework.
 
-- Health Data 
+- Health Data
   - Pulled from Our World in Data [https://github.com/owid/covid-19-data/](https://github.com/owid/covid-19-data/)
-- Vaccine Purchase &  Manufacturing Arrangements data 
-  - Pulled from Graduate Institute [https://www.knowledgeportalia.org/covid19-vaccine-arrangements](https://www.knowledgeportalia.org/covid19-vaccine-arrangements)
-    - Data is manually pulled and converted to `.csv`.
+- COVID-19 Vaccine Purchases and Manufacturing Agreements data
+  - Pulled from Graduate Institute of International and Development Studies [https://www.knowledgeportalia.org/covid19-vaccine-arrangements](https://www.knowledgeportalia.org/covid19-vaccine-arrangements)
+    - The dataset and graphics are updated every one to two weeks. Given that this dataset is reliant on information reported in the public domain, it may contain inaccuracies, be incomplete, or quickly become out of date.
 - Mobility Trends
   - Apple Mobility Trends Reports from [https://covid19.apple.com/mobility](https://covid19.apple.com/mobility)
   - Google Community Mobility Trends Reports from [https://www.google.com/covid19/mobility/](https://www.google.com/covid19/mobility/)
@@ -23,7 +23,7 @@ For bleeding-edge website, we also hosted on [dev.covid.sagelga.com](http://dev.
 ## Project Roadmaps
 We stored roadmaps here : [https://github.com/sagelga/covid-vaccine/projects](https://github.com/sagelga/covid-vaccine/projects)
 ## Develop
-To locally develop this project, here's what you need 
+To locally develop this project, here's what you need
 1. Python >= 3.6
 2. Python Virtual Environment (venv) (Strongly Recommended)
 3. IDE or Text Editor you are familiar with
