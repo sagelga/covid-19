@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 
 # Data Import
-url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-primary.csv'
-df = pd.read_csv(url, encoding='latin-1')
+url = '../data/knowledgeportalia-primary.tsv'
+df = pd.read_csv(url, encoding='latin-1', sep='\t')
 
 # Rename columns
 df = df.rename(columns={
@@ -35,8 +35,8 @@ l1_df = l1_df.sort_values(by=['Country', 'Vaccine Candidate'])
 # ------------------------------------------------------------------------
 
 # Secondary Trade Data Import
-url = 'https://raw.githubusercontent.com/sagelga/covid-vaccine/main/data/knowledgeportalia-secondary.csv'
-l2_df = pd.read_csv(url, encoding='latin-1')
+url = '../data/knowledgeportalia-secondary.tsv'
+l2_df = pd.read_csv(url, encoding='latin-1', sep='\t')
 
 # Select data
 l2_df = l2_df[[
@@ -46,10 +46,7 @@ l2_df = l2_df[[
 
 # Rename columns
 l2_df = l2_df.rename(columns={
-    'Recipient Country ': 'Country'
-    , 'Doses Committed (in millions)': 'Doses'
-    , 'Recipient Income Level': 'Income Level'
-    , ' Population size ': 'Population'
+    'Recipient Country ': 'Country', 'Doses Committed (in millions)': 'Doses', 'Recipient Income Level': 'Income Level', ' Population size ': 'Population'
 })
 
 # Fix data inconsistencies
@@ -57,15 +54,19 @@ l2_df = l2_df.loc[l2_df['Finalized Commitment'] == 'Yes']
 
 l2_df = l2_df.dropna(subset=['Country', 'Doses'])
 
-l2_df['Doses'] = pd.to_numeric(l2_df['Doses'] * 1000000, errors='coerce').fillna(0)
-l2_df['Vaccine Candidate'] = l2_df['Vaccine Candidate'].replace('Not available', 'Unknown')
-l2_df['Vaccine Candidate'] = l2_df['Vaccine Candidate'].replace(np.nan, 'Unknown')
+l2_df['Doses'] = pd.to_numeric(
+    l2_df['Doses'] * 1000000, errors='coerce').fillna(0)
+l2_df['Vaccine Candidate'] = l2_df['Vaccine Candidate'].replace(
+    'Not available', 'Unknown')
+l2_df['Vaccine Candidate'] = l2_df['Vaccine Candidate'].replace(
+    np.nan, 'Unknown')
 l2_df['Deal Type'] = 'Donation'
 
 # ------------------------------------------------------------------------
 
 # Vaccine Candidate info
-columns = ['Vaccine Candidate', 'Developer Location', 'Trial Phase', '1 or 2 doses']
+columns = ['Vaccine Candidate', 'Developer Location',
+           'Trial Phase', '1 or 2 doses']
 info_df = df[columns] \
     .drop_duplicates(subset=columns) \
     .rename(columns={'1 or 2 doses': 'Dose Needed'}) \
